@@ -1,0 +1,184 @@
+
+/* Artist page specific styles */
+.artist-header {
+  height: 40vh;
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 32px;
+  color: white;
+  background-size: cover;
+  background-position: center 30%;
+  position: relative;
+}
+
+.artist-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+}
+
+.artist-details {
+  position: relative;
+  z-index: 1;
+}
+
+.verified-badge {
+  background-color: #3D91F4;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  font-size: 12px;
+}
+
+.artist-name {
+  font-size: 72px;
+  font-weight: 900;
+  margin: 20px 0;
+}
+
+.artist-stats {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+}
+
+.artist-actions {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.btn-play-large {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--spotify-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  color: black;
+  border: none;
+  font-size: 24px;
+}
+
+.btn-following {
+  border: 1px solid rgba(255,255,255,0.7);
+  background-color: transparent;
+  color: white;
+  border-radius: 500px;
+  padding: 8px 24px;
+  font-weight: 700;
+  margin-right: 16px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 32px 0 16px;
+}
+
+.popular-tracks {
+  padding: 0 32px;
+}
+
+.popular-track {
+  display: grid;
+  grid-template-columns: 16px 4fr 3fr 16px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  align-items: center;
+}
+
+.popular-track:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.popular-track-number {
+  color: var(--spotify-light-gray);
+  font-size: 14px;
+}
+
+.popular-track-info {
+  display: flex;
+  align-items: center;
+}
+
+.popular-track-img {
+  width: 40px;
+  height: 40px;
+  margin-right: 16px;
+}
+
+.popular-track-title {
+  font-weight: 500;
+}
+
+.popular-track-streams {
+  color: var(--spotify-light-gray);
+  font-size: 14px;
+}
+
+.popular-track-duration {
+  text-align: right;
+  color: var(--spotify-light-gray);
+  font-size: 14px;
+}
+
+.discography {
+  padding: 0 32px;
+}
+
+.see-more-link {
+  color: var(--spotify-light-gray);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.see-more-link:hover {
+  color: white;
+}
+
+.related-artists {
+  padding: 0 32px;
+  margin-bottom: 32px;
+}
+
+.artist-card {
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--spotify-dark-gray);
+  transition: background-color 0.3s;
+}
+
+.artist-card:hover {
+  background-color: var(--spotify-medium-gray);
+}
+
+.artist-card-img {
+  width: 100%;
+  height: auto;
+  border-radius: 50%;
+  padding: 10%;
+}
+
+.artist-card-name {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.artist-card-type {
+  font-size: 14px;
+  color: var(--spotify-light-gray);
+}

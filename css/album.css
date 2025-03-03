@@ -1,0 +1,117 @@
+
+/* Album page specific styles */
+.album-content {
+  padding: 0;
+}
+
+.album-header {
+  display: flex;
+  align-items: flex-end;
+  padding: 32px;
+  color: white;
+  background: linear-gradient(to bottom, #8a8a8a, var(--spotify-black) 85%);
+}
+
+.album-cover-lg {
+  width: 232px;
+  height: 232px;
+  box-shadow: 0 4px 60px rgba(0,0,0,0.5);
+}
+
+.album-info {
+  margin-left: 24px;
+}
+
+.album-info .album-type {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.album-info .album-title {
+  font-size: 36px;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.album-info .album-details {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.album-actions {
+  margin-top: 32px;
+}
+
+.btn-play {
+  background-color: var(--spotify-green);
+  color: black;
+  border-radius: 500px;
+  padding: 8px 32px;
+  font-weight: 700;
+}
+
+.btn-save {
+  border: 1px solid white;
+  color: white;
+  background-color: transparent;
+  border-radius: 500px;
+  padding: 8px 32px;
+  margin-left: 8px;
+}
+
+.track-list {
+  padding: 0 32px;
+  margin-bottom: 32px;
+}
+
+.track-list-header {
+  display: grid;
+  grid-template-columns: 16px 4fr 3fr 16px;
+  padding: 0 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 8px;
+}
+
+.track-list-row {
+  display: grid;
+  grid-template-columns: 16px 4fr 3fr 16px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  align-items: center;
+}
+
+.track-list-row:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.track-number {
+  color: var(--spotify-light-gray);
+  font-size: 14px;
+}
+
+.track-title {
+  font-weight: 500;
+}
+
+.track-artist {
+  color: var(--spotify-light-gray);
+  font-size: 14px;
+}
+
+.track-duration {
+  text-align: right;
+  color: var(--spotify-light-gray);
+  font-size: 14px;
+}
+
+.track-actions {
+  text-align: right;
+  opacity: 0;
+}
+
+.track-list-row:hover .track-actions {
+  opacity: 1;
+}
