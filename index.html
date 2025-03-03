@@ -1,16 +1,365 @@
-<!DOCTYPE html>
-<html lang="en">
+
+<!doctype html>
+<html lang="it">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spotify Clone</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="./css/style.css" rel="stylesheet">
 </head>
+
 <body>
-    <h1>Welcome to the home page</h1>
-    <p>Lorenzo</p>
-    <p>Paola</p>
-   <p>eleonora</p>
-   <p>Massimiliano</p>
-    <p>Giuseppe</p>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar navigation -->
+      <div class="col-md-2 sidebar">
+        <div class="sidebar-content">
+          <div class="logo mb-4 mt-3">
+            <h2 class="text-white">Spotify Clone</h2>
+          </div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" href="./index.html"><i class="bi bi-house-door-fill"></i> Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="search-link"><i class="bi bi-search"></i> Cerca</a>
+            </li>
+            <li class="nav-item" id="search-box" style="display: none;">
+              <div class="mt-2 mb-2">
+                <input type="text" id="search-input" class="form-control form-control-sm" placeholder="Cosa vuoi ascoltare?">
+              </div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#"><i class="bi bi-collection"></i> La tua libreria</a>
+            </li>
+            <li class="nav-item mt-3">
+              <a class="nav-link" href="#"><i class="bi bi-plus-square"></i> Crea playlist</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#"><i class="bi bi-heart-fill"></i> Brani che ti piacciono</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#"><i class="bi bi-bookmark-fill"></i> I tuoi episodi</a>
+            </li>
+          </ul>
+          <div class="playlist-list mt-3">
+            <ul class="nav flex-column">
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">early stage emily syndrome (sett-ott 2022)</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">Be The Young</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">"..." cit. Kimiko (lug-ago 2022)</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">saggio vibes🌹📱🌸</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">main character energy (mag-giu 2022)</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">that fucking mood 🔪☠️</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">VEE, CARLOTTA E GIACOMO VANNO A BOSIO</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">An Emily Winchester kind of mood 🔪🔥</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">landing page (mar-apr 2022)</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">2021 lol</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">cosa cazzo vuol dire questa affermazione (gen-feb...)</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">honey and glass (nov-dic 2021)</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">(Revenge) Training Arc 🏋️</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">Lidia 🧡 Emily</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">minecraft e nintendo switch (sep-oct 2021)</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">silvano d'orba? I hardly know her (lug - ago 2021)</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">Culo 2021</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">Frah Quintale Mix</a></li>
+              <li class="nav-item"><a class="nav-link playlist-item" href="#">Francesco Guccini Mix</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main content area -->
+      <div class="col-md-8 main-content">
+        <div class="main-header">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="nav-controls">
+                <button class="btn btn-dark btn-circle"><i class="bi bi-chevron-left"></i></button>
+                <button class="btn btn-dark btn-circle"><i class="bi bi-chevron-right"></i></button>
+              </div>
+            </div>
+            <div class="col-md-6 text-end">
+              <div class="user-controls">
+                <span class="user-name me-2">Lidia Nautilus...</span>
+                <button class="btn btn-dark btn-sm dropdown-toggle"><i class="bi bi-person-circle"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="content-area" class="p-4">
+          <!-- Album in evidenza -->
+          <div id="featured-album" class="mb-5">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="featured-album-container">
+                  <div class="featured-album-bg"></div>
+                  <div class="row">
+                    <div class="col-md-3">
+                      <img id="featured-album-img" src="https://via.placeholder.com/250" alt="Album cover" class="featured-album-cover shadow">
+                    </div>
+                    <div class="col-md-9">
+                      <div class="featured-album-details">
+                        <div class="album-type">ALBUM</div>
+                        <h1 id="featured-album-title" class="display-3 fw-bold mb-3">Caricamento...</h1>
+                        <div id="featured-album-artist" class="mb-2">Caricamento...</div>
+                        <div id="featured-album-description" class="mb-3">Ascolta il nuovo singolo!</div>
+                        <div class="d-flex">
+                          <button class="btn btn-success rounded-pill me-2 px-4 py-2">Play</button>
+                          <button class="btn btn-dark rounded-pill me-2 px-4 py-2">Salva</button>
+                          <button class="btn btn-dark rounded-circle p-2"><i class="bi bi-three-dots"></i></button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sezione 1: Buonasera -->
+          <h2 class="text-white mb-4">Buonasera</h2>
+          <div class="row mb-5">
+            <div class="col-6 col-md-4 mb-3">
+              <div class="card recent-card" data-album-id="">
+                <div class="card-body d-flex align-items-center">
+                  <img src="https://via.placeholder.com/60" class="recent-album-img">
+                  <span class="ms-3">Caricamento...</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 mb-3">
+              <div class="card recent-card" data-album-id="">
+                <div class="card-body d-flex align-items-center">
+                  <img src="https://via.placeholder.com/60" class="recent-album-img">
+                  <span class="ms-3">Caricamento...</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 mb-3">
+              <div class="card recent-card" data-album-id="">
+                <div class="card-body d-flex align-items-center">
+                  <img src="https://via.placeholder.com/60" class="recent-album-img">
+                  <span class="ms-3">Caricamento...</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 mb-3">
+              <div class="card recent-card" data-album-id="">
+                <div class="card-body d-flex align-items-center">
+                  <img src="https://via.placeholder.com/60" class="recent-album-img">
+                  <span class="ms-3">Caricamento...</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 mb-3">
+              <div class="card recent-card" data-album-id="">
+                <div class="card-body d-flex align-items-center">
+                  <img src="https://via.placeholder.com/60" class="recent-album-img">
+                  <span class="ms-3">Caricamento...</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 mb-3">
+              <div class="card recent-card" data-album-id="">
+                <div class="card-body d-flex align-items-center">
+                  <img src="https://via.placeholder.com/60" class="recent-album-img">
+                  <span class="ms-3">Caricamento...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sezione 2: Altro di ciò che ti piace -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="text-white">Altro di ciò che ti piace</h2>
+            <a href="#" class="text-uppercase text-decoration-none text-white-50 small">Visualizza tutto</a>
+          </div>
+          <div class="row mb-5">
+            <div id="album-list" class="row">
+              <!-- Album list will be loaded here via API -->
+            </div>
+          </div>
+
+          <!-- Sezione 3: Hot Hits, Tendenze, ecc. -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="text-white">In tendenza</h2>
+            <a href="#" class="text-uppercase text-decoration-none text-white-50 small">Visualizza tutto</a>
+          </div>
+          <div class="row" id="trending-container">
+            <div class="col-6 col-md-4 col-lg-2 mb-4">
+              <div class="card album-card" data-album-id="">
+                <img src="https://via.placeholder.com/150" class="card-img-top" alt="Hot Hits Italia">
+                <div class="play-hover">
+                  <i class="bi bi-play-fill"></i>
+                </div>
+                <div class="card-body p-2">
+                  <h5 class="card-title">Hot Hits Italia</h5>
+                  <p class="card-text">La playlist più calda del momento!</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 mb-4">
+              <div class="card album-card" data-album-id="">
+                <img src="https://via.placeholder.com/150" class="card-img-top" alt="big on the internet">
+                <div class="play-hover">
+                  <i class="bi bi-play-fill"></i>
+                </div>
+                <div class="card-body p-2">
+                  <h5 class="card-title">big on the internet</h5>
+                  <p class="card-text">Viral hits and internet sensations.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 mb-4">
+              <div class="card album-card" data-album-id="">
+                <img src="https://via.placeholder.com/150" class="card-img-top" alt="Pop Rising">
+                <div class="play-hover">
+                  <i class="bi bi-play-fill"></i>
+                </div>
+                <div class="card-body p-2">
+                  <h5 class="card-title">Pop Rising</h5>
+                  <p class="card-text">The hits of tomorrow are on Pop Rising.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 mb-4">
+              <div class="card album-card" data-album-id="">
+                <img src="https://via.placeholder.com/150" class="card-img-top" alt="Canzoni Tristi">
+                <div class="play-hover">
+                  <i class="bi bi-play-fill"></i>
+                </div>
+                <div class="card-body p-2">
+                  <h5 class="card-title">Canzoni Tristi</h5>
+                  <p class="card-text">Per quando hai bisogno di sfogarti.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 mb-4">
+              <div class="card album-card" data-album-id="">
+                <img src="https://via.placeholder.com/150" class="card-img-top" alt="In tendenza">
+                <div class="play-hover">
+                  <i class="bi bi-play-fill"></i>
+                </div>
+                <div class="card-body p-2">
+                  <h5 class="card-title">In tendenza</h5>
+                  <p class="card-text">Viral & trending in cancella.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Amici sidebar -->
+      <div class="col-md-2 friends-sidebar">
+        <div class="friends-header d-flex justify-content-between align-items-center p-3">
+          <h5 class="text-white m-0">Attività amici</h5>
+          <div>
+            <button class="btn btn-sm btn-dark"><i class="bi bi-person-plus"></i></button>
+            <button class="btn btn-sm btn-dark"><i class="bi bi-x-lg"></i></button>
+          </div>
+        </div>
+        <div class="friends-list p-2">
+          <div class="friend-activity p-2 mb-3">
+            <div class="d-flex">
+              <img src="https://images.pexels.com/photos/1987301/pexels-photo-1987301.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Charlie Hookham" class="rounded-circle">
+              <div class="ms-2">
+                <p class="friend-name m-0 text-white">Charlie Hookham</p>
+                <p class="friend-status m-0 text-white-50 small">
+                  In ascolto • Your Autumn</p>
+                <p class="friend-extra m-0 text-white-50 d-flex align-items-center small">
+                  <i class="bi bi-disc me-1"></i> LESSERAFIM
+                </p>
+              </div>
+              <div class="ms-auto text-white-50 small">4 ore</div>
+            </div>
+          </div>
+          <div class="friend-activity p-2 mb-3">
+            <div class="d-flex">
+              <img src="https://images.pexels.com/photos/388517/pexels-photo-388517.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Juliet Huffaker" class="rounded-circle">
+              <div class="ms-2">
+                <p class="friend-name m-0 text-white">Juliet Huffaker</p>
+                <p class="friend-status m-0 text-white-50 small">
+                  Ascolto da Kil Julio LaRive</p>
+                <p class="friend-extra m-0 text-white-50 d-flex align-items-center small">
+                  <i class="bi bi-music-note-beamed me-1"></i> Asleep by Kil
+                </p>
+              </div>
+              <div class="ms-auto text-white-50 small">8 min</div>
+            </div>
+          </div>
+          <div class="friend-activity p-2 mb-3">
+            <div class="d-flex">
+              <img src="https://images.pexels.com/photos/821414/pexels-photo-821414.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Victoria Traverso" class="rounded-circle">
+              <div class="ms-2">
+                <p class="friend-name m-0 text-white">Victoria Traverso</p>
+                <p class="friend-status m-0 text-white-50 small">
+                  Now Rings • Dripping Wolf</p>
+                <p class="friend-extra m-0 text-white-50 d-flex align-items-center small">
+                  <i class="bi bi-music-note-beamed me-1"></i> Town Bazaars (remix)
+                </p>
+              </div>
+              <div class="ms-auto text-white-50 small">3 giorni</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Player bar -->
+  <div class="player-bar">
+    <div class="container-fluid">
+      <div class="row align-items-center">
+        <div class="col-md-3">
+          <div class="now-playing d-flex align-items-center">
+            <img src="https://via.placeholder.com/56" alt="Album cover" class="current-album-img">
+            <div class="track-info ms-2">
+              <div class="track-name">Track Name</div>
+              <div class="artist-name">Artist Name</div>
+            </div>
+            <button class="btn btn-link text-white ms-2"><i class="bi bi-heart"></i></button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="player-controls text-center">
+            <div class="control-buttons mb-1">
+              <button class="btn btn-link text-white"><i class="bi bi-shuffle"></i></button>
+              <button class="btn btn-link text-white"><i class="bi bi-skip-backward-fill"></i></button>
+              <button class="btn btn-link text-white play-btn"><i class="bi bi-play-circle-fill"></i></button>
+              <button class="btn btn-link text-white"><i class="bi bi-skip-forward-fill"></i></button>
+              <button class="btn btn-link text-white"><i class="bi bi-repeat"></i></button>
+            </div>
+            <div class="progress-container d-flex align-items-center">
+              <div class="current-time">0:00</div>
+              <div class="progress flex-grow-1 mx-2" style="height: 4px;">
+                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+              </div>
+              <div class="total-time">3:30</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="volume-controls d-flex align-items-center justify-content-end">
+            <button class="btn btn-link text-white"><i class="bi bi-volume-up"></i></button>
+            <div class="progress mx-2" style="width: 100px; height: 4px;">
+              <div class="progress-bar" role="progressbar" style="width: 50%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+  <script src="./js/script.js"></script>
 </body>
+
 </html>
