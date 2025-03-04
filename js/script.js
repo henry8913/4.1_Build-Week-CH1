@@ -161,7 +161,7 @@ function displayRecentlyPlayed(items) {
     if(item && item.album && item.album.cover_small && item.title && item.artist && item.artist.name){
         recentCards[i].innerHTML = `
           <img src="${item.album.cover_small}" class="recent-album-img" alt="${item.album.title}">
-          <div class="ms-3">
+          <div class="ms-3 overflow-hidden">
             <span class="d-block text-truncate fw-bold">${item.title}</span>
             <span class="d-block text-truncate small text-white-50">${item.artist.name}</span>
           </div>
