@@ -19,6 +19,13 @@ body {
   overflow: hidden;
 }
 
+/* classe dedicata allo style desktop
+@media screen and (max-width: 1010px) {
+  .desktop {
+    display: none;
+  }
+} */
+
 /* Sidebar styling */
 .sidebar {
   background-color: var(--spotify-darker-black);
