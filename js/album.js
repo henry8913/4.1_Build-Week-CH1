@@ -120,6 +120,23 @@ function updatePlayerBar(track, album) {
   const currentAlbumImg = document.querySelector('.current-album-img');
   const trackNameElement = document.querySelector('.track-name');
   const artistNameElement = document.querySelector('.artist-name');
+  const playButton = document.getElementById('playAction')
+
+  let currentSong = null
+
+  // funzione per far partire l'audio della canzone
+  function playSong(url) {
+    if (currentSong && !currentSong.paused) {
+      currentSong.pause()
+      currentSong.currentTime = 0
+      currentSong = null
+      playButton.innerHTML = '<i class="bi bi-play-circle-fill"></i>'
+    } else {
+      currentSong = new Audio(url)
+      currentSong.play()
+      playButton.innerHTML = '<i class="bi bi-pause-circle-fill"></i>'
+    }
+  }
 
   if (currentAlbumImg) currentAlbumImg.src = album.cover_small;
   if (trackNameElement) trackNameElement.textContent = track.title;
@@ -127,6 +144,9 @@ function updatePlayerBar(track, album) {
     artistNameElement.innerHTML = `
       <a href="artist.html?id=${track.artist.id}" class="text-white-50">${track.artist.name}</a>
     `;
+  playButton.addEventListener('click', () => {
+    playSong(track.preview)
+  })
   }
 
   const totalTimeElement = document.querySelector('.total-time');

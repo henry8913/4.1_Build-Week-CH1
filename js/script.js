@@ -463,11 +463,30 @@ function updatePlayerBar(track) {
     console.error("Missing data in track item:", track);
     return;
   }
+
+  let currentSong = null
+
+  // funzione per far partire l'audio della canzone
+  function playSongs(url) {
+    if (currentSong && !currentSong.paused) {
+      currentSong.pause()
+      currentSong.currentTime = 0
+      currentSong = null
+      playBtn.innerHTML = '<i class="bi bi-play-circle-fill"></i>'
+    } else {
+      currentSong = new Audio(url)
+      currentSong.play()
+      playBtn.innerHTML = '<i class="bi bi-pause-circle-fill"></i>'
+    }
+  }
   
+
   // Recupera gli elementi del player bar
   const currentAlbumImg = document.querySelector('.current-album-img');
   const trackNameElement = document.querySelector('.track-name');
   const artistNameElement = document.querySelector('.artist-name');
+  const playBtn = document.getElementById('playSong');
+
   
   // Aggiorna con i dati dell'API
   if (currentAlbumImg) currentAlbumImg.src = track.album.cover_small || 'https://via.placeholder.com/56';
@@ -476,6 +495,9 @@ function updatePlayerBar(track) {
     artistNameElement.innerHTML = `
       <a href="artist.html?id=${track.artist.id}" class="text-white-50">${track.artist.name}</a>
     `;
+  playBtn.addEventListener('click', () => {
+    playSongs(track.preview)
+  })
   }
   
   // Aggiorna anche il tempo totale (opzionale, se disponibile nell'API)
@@ -580,3 +602,5 @@ function displaySearchResults(items) {
     searchResults.appendChild(albumElement);
   });
 }
+
+
