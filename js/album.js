@@ -1,5 +1,5 @@
+
 document.addEventListener('DOMContentLoaded', function() {
-  // Ottieni l'ID dell'album dall'URL
   const urlParams = new URLSearchParams(window.location.search);
   const albumId = urlParams.get('id');
 
@@ -13,11 +13,13 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
   }
 
-  // Setup per la funzionalità di ricerca
   setupSearch();
 });
 
-// Fetch album details from API
+// ===================================================
+// ALBUM DATA FETCHING
+// ===================================================
+
 function fetchAlbumDetails(albumId) {
   const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/album/${albumId}`;
 
@@ -41,7 +43,10 @@ function fetchAlbumDetails(albumId) {
     });
 }
 
-// Display album details in the UI
+// ===================================================
+// ALBUM UI RENDERING
+// ===================================================
+
 function displayAlbumDetails(album) {
   if (!album) {
     console.error("No album data available");
@@ -50,11 +55,9 @@ function displayAlbumDetails(album) {
 
   const albumDetailsContainer = document.getElementById('album-details-container');
 
-  // Format the release date
   const releaseDate = new Date(album.release_date);
   const year = releaseDate.getFullYear();
 
-  // Calculate total duration
   const totalDurationSeconds = album.tracks.data.reduce((acc, track) => acc + track.duration, 0);
   const totalMinutes = Math.floor(totalDurationSeconds / 60);
   const totalSeconds = totalDurationSeconds % 60;
@@ -82,7 +85,7 @@ function displayAlbumDetails(album) {
       <div class="track-list-header">
         <div class="track-number">#</div>
         <div>TITOLO</div>
-        <div class="track-duration"><i class="bi bi-clock"></i></div>
+        <div class="track-duration d-none d-sm-block"><i class="bi bi-clock"></i></div>
       </div>
 
       ${album.tracks.data.map((track, index) => {
@@ -93,7 +96,7 @@ function displayAlbumDetails(album) {
             <div class="track-number">${index + 1}</div>
             <div class="track-title">${track.title}</div>
             <div class="track-artist">${track.artist.name}</div>
-            <div class="track-duration">${minutes}:${seconds < 10 ? '0' + seconds : seconds}</div>
+            <div class="track-duration d-none d-sm-block">${minutes}:${seconds < 10 ? '0' + seconds : seconds}</div>
           </div>
         `;
       }).join('')}
@@ -109,34 +112,19 @@ function displayAlbumDetails(album) {
     </div>
   `;
 
-  // Update the player bar with the first track info
   if (album.tracks && album.tracks.data && album.tracks.data.length > 0) {
     updatePlayerBar(album.tracks.data[0], album);
   }
 }
 
-// Update the player bar with track information
+// ===================================================
+// PLAYER BAR UPDATES
+// ===================================================
+
 function updatePlayerBar(track, album) {
   const currentAlbumImg = document.querySelector('.current-album-img');
   const trackNameElement = document.querySelector('.track-name');
   const artistNameElement = document.querySelector('.artist-name');
-  const playButton = document.getElementById('playAction')
-
-  let currentSong = null
-
-  // funzione per far partire l'audio della canzone
-  function playSong(url) {
-    if (currentSong && !currentSong.paused) {
-      currentSong.pause()
-      currentSong.currentTime = 0
-      currentSong = null
-      playButton.innerHTML = '<i class="bi bi-play-circle-fill"></i>'
-    } else {
-      currentSong = new Audio(url)
-      currentSong.play()
-      playButton.innerHTML = '<i class="bi bi-pause-circle-fill"></i>'
-    }
-  }
 
   if (currentAlbumImg) currentAlbumImg.src = album.cover_small;
   if (trackNameElement) trackNameElement.textContent = track.title;
@@ -144,9 +132,6 @@ function updatePlayerBar(track, album) {
     artistNameElement.innerHTML = `
       <a href="artist.html?id=${track.artist.id}" class="text-white-50">${track.artist.name}</a>
     `;
-  playButton.addEventListener('click', () => {
-    playSong(track.preview)
-  })
   }
 
   const totalTimeElement = document.querySelector('.total-time');
@@ -157,14 +142,21 @@ function updatePlayerBar(track, album) {
   }
 }
 
-// Setup della funzionalità di ricerca
+// ===================================================
+// SEARCH FUNCTIONALITY
+// ===================================================
+
 function setupSearch() {
   const searchLink = document.getElementById('search-link');
   const searchBox = document.getElementById('search-box');
   const searchInput = document.getElementById('search-input');
 
+  const mobileSearchLink = document.getElementById('mobile-search-link');
+  const mobileSearchBox = document.getElementById('mobile-search-box');
+  const mobileSearchInput = document.getElementById('mobile-search-input');
+  const mobileSearchButton = document.getElementById('mobile-search-button');
+
   if (searchLink && searchBox && searchInput) {
-    // Mostra/nascondi il campo di ricerca quando si clicca su "Cerca"
     searchLink.addEventListener('click', function(e) {
       e.preventDefault();
       if (searchBox.style.display === 'none' || searchBox.style.display === '') {
@@ -175,54 +167,82 @@ function setupSearch() {
       }
     });
 
-    // Esegui la ricerca quando l'utente preme Invio nel campo di ricerca
     searchInput.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         const query = e.target.value.trim();
         if (query) {
-          // Redirect alla homepage con parametro di ricerca
           window.location.href = `index.html?search=${encodeURIComponent(query)}`;
         }
       }
     });
   }
+
+  if (mobileSearchLink && mobileSearchBox && mobileSearchInput) {
+    if (window.innerWidth < 992) {
+      mobileSearchLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = 'search.html';
+      });
+    } else {
+      mobileSearchLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (mobileSearchBox.style.display === 'none' || mobileSearchBox.style.display === '') {
+          mobileSearchBox.style.display = 'block';
+          mobileSearchInput.focus();
+        } else {
+          mobileSearchBox.style.display = 'none';
+        }
+      });
+    }
+
+    mobileSearchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        const query = e.target.value.trim();
+        if (query) {
+          if (window.innerWidth < 992) {
+            window.location.href = `search.html?search=${encodeURIComponent(query)}`;
+          } else {
+            window.location.href = `index.html?search=${encodeURIComponent(query)}`;
+          }
+        }
+      }
+    });
+
+    if (mobileSearchButton) {
+      mobileSearchButton.addEventListener('click', function() {
+        const query = mobileSearchInput.value.trim();
+        if (query) {
+          if (window.innerWidth < 992) {
+            window.location.href = `search.html?search=${encodeURIComponent(query)}`;
+          } else {
+            window.location.href = `index.html?search=${encodeURIComponent(query)}`;
+          }
+        }
+      });
+    }
+  }
 }
 
-// Load player bar with a track when album page loads
+// ===================================================
+// INITIALIZATION
+// ===================================================
+
 document.addEventListener('DOMContentLoaded', function() {
-  // Get album ID from URL
   const urlParams = new URLSearchParams(window.location.search);
   const albumId = urlParams.get('id');
 
   if (albumId) {
     fetchAlbumDetails(albumId);
-    // Also load a random track in the player bar
     fetchPlayerBarTrack();
   } else {
     showError("Album ID not found in URL");
   }
 });
 
-// Fetch a random track for the player bar
-function fetchPlayerBarTrack() {
-  const popularArtists = ['Kendrick Lamar', 'Arctic Monkeys', 'Doja Cat', 'Post Malone', 'Mahmood', 'Maneskin'];
-  const randomArtist = popularArtists[Math.floor(Math.random() * popularArtists.length)];
-  const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/search?q=${randomArtist}&limit=1`;
+// ===================================================
+// UTILITY FUNCTIONS
+// ===================================================
 
-  fetch(apiUrl)
-    .then(response => {
-      if (!response.ok) throw new Error('Network response was not ok');
-      return response.json();
-    })
-    .then(data => {
-      if (data.data && data.data.length > 0) {
-        updatePlayerBar(data.data[0]);
-      }
-    })
-    .catch(error => console.error('Error fetching track for player bar:', error));
-}
-
-//This function was already present in the original code.
 function showError(message) {
     const errorContainer = document.getElementById('error-container');
     if (errorContainer) {
