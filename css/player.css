@@ -1,0 +1,151 @@
+
+/* Player Bar Styles */
+.player-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background-color: #0a0a0a;
+  border-top: 1px solid #282828;
+  z-index: 2000;
+}
+
+.now-playing {
+  display: flex;
+  align-items: center;
+}
+
+.current-album-img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.track-info {
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.track-name {
+  font-weight: 500;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.artist-name {
+  font-size: 12px;
+  color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.artist-name a {
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.artist-name a:hover {
+  color: white !important;
+  text-decoration: underline;
+}
+
+.player-controls .btn-link {
+  font-size: 1.2em;
+  padding: 0 12px;
+  transition: transform 0.1s;
+}
+
+.player-controls .btn-link:hover {
+  transform: scale(1.1);
+}
+
+.play-btn {
+  font-size: 2em !important;
+}
+
+.progress {
+  height: 4px;
+  background-color: #5a5a5a;
+  cursor: pointer;
+  transition: height 0.2s;
+}
+
+.progress:hover {
+  height: 6px;
+}
+
+.progress-bar {
+  background-color: #1DB954;
+}
+
+.current-time, .total-time {
+  font-size: 12px;
+  color: #b3b3b3;
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #000;
+  padding: 10px 0;
+  width: 100%;
+}
+
+.mobile-nav .nav-item {
+  flex: 1;
+}
+
+.mobile-nav .nav-link {
+  color: #b3b3b3;
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.mobile-nav .nav-link.active {
+  color: white;
+}
+
+.mobile-nav .bi {
+  font-size: 1.5rem;
+}
+
+.mobile-search-container {
+  background-color: #282828;
+  padding: 10px;
+  position: fixed;
+  bottom: 90px;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .now-playing {
+    justify-content: center;
+  }
+  
+  .player-controls {
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .player-bar {
+    padding-bottom: 70px;
+  }
+  
+  .player-controls .progress-container {
+    width: 90%;
+    margin: 0 auto;
+  }
+}

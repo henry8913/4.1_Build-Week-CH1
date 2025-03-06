@@ -1,23 +1,22 @@
+
 document.addEventListener('DOMContentLoaded', function() {
-  // Ottieni l'ID dell'artista dall'URL
   const urlParams = new URLSearchParams(window.location.search);
   const artistId = urlParams.get('id');
 
   if (artistId) {
     fetchArtistDetails(artistId);
   } else {
-    document.getElementById('artist-details-container').innerHTML = `
-      <div class="alert alert-danger">
-        Nessun ID artista specificato nell'URL.
-      </div>
-    `;
+    showError('ID artista non specificato nell\'URL');
   }
 
-  // Setup per la funzionalità di ricerca
   setupSearch();
+  setupMobileSearch();
 });
 
-// Fetch artist details from API
+// ===================================================
+// ARTIST DATA FETCHING
+// ===================================================
+
 function fetchArtistDetails(artistId) {
   const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/artist/${artistId}`;
 
@@ -43,7 +42,6 @@ function fetchArtistDetails(artistId) {
     });
 }
 
-// Fetch top tracks for the artist
 function fetchArtistTopTracks(artistId) {
   const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/artist/${artistId}/top?limit=5`;
 
@@ -67,7 +65,6 @@ function fetchArtistTopTracks(artistId) {
     });
 }
 
-// Fetch albums for the artist
 function fetchArtistAlbums(artistId) {
   const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/artist/${artistId}/albums`;
 
@@ -91,7 +88,10 @@ function fetchArtistAlbums(artistId) {
     });
 }
 
-// Display artist details in the UI
+// ===================================================
+// ARTIST UI RENDERING
+// ===================================================
+
 function displayArtistDetails(artist) {
   const artistDetailsContainer = document.getElementById('artist-details-container');
 
@@ -142,11 +142,9 @@ function displayArtistDetails(artist) {
     </div>
   `;
 
-  // Update the player bar
   updatePlayerBar(artist);
 }
 
-// Display top tracks for the artist
 function displayArtistTopTracks(tracks) {
   const topTracksContainer = document.getElementById('top-tracks-container');
 
@@ -170,7 +168,7 @@ function displayArtistTopTracks(tracks) {
             <div class="popular-track-title">${track.title}</div>
           </div>
         </div>
-        <div class="popular-track-streams">${Math.floor(Math.random() * 1000000).toLocaleString()} riproduzioni</div>
+        <div class="popular-track-streams d-none d-md-block">${Math.floor(Math.random() * 1000000).toLocaleString()} riproduzioni</div>
         <div class="popular-track-duration">${minutes}:${seconds < 10 ? '0' + seconds : seconds}</div>
       </div>
     `;
@@ -179,7 +177,6 @@ function displayArtistTopTracks(tracks) {
   topTracksContainer.innerHTML = tracksHTML;
 }
 
-// Display albums for the artist
 function displayArtistAlbums(albums) {
   const discographyContainer = document.getElementById('discography-container');
 
@@ -188,15 +185,13 @@ function displayArtistAlbums(albums) {
     return;
   }
 
-  // Filter out duplicate albums by title
   const uniqueAlbums = Array.from(new Map(albums.map(album => [album.title, album])).values());
 
   let albumsHTML = '';
 
-  // Display up to 6 albums
   uniqueAlbums.slice(0, 6).forEach(album => {
     albumsHTML += `
-      <div class="col-md-4 col-lg-2 mb-4">
+      <div class="col-6 col-md-4 col-lg-2 mb-4">
         <div class="card album-card" data-album-id="${album.id}">
           <img src="${album.cover_medium}" class="card-img-top" alt="${album.title}">
           <div class="play-hover">
@@ -213,7 +208,6 @@ function displayArtistAlbums(albums) {
 
   discographyContainer.innerHTML = albumsHTML;
 
-  // Add click events to album cards
   document.querySelectorAll('.album-card').forEach(card => {
     card.addEventListener('click', function() {
       window.location.href = `album.html?id=${this.dataset.albumId}`;
@@ -221,7 +215,10 @@ function displayArtistAlbums(albums) {
   });
 }
 
-// Update the player bar with artist information
+// ===================================================
+// PLAYER BAR UPDATES
+// ===================================================
+
 function updatePlayerBar(artist) {
   const currentAlbumImg = document.querySelector('.current-album-img');
   const trackNameElement = document.querySelector('.track-name');
@@ -236,14 +233,16 @@ function updatePlayerBar(artist) {
   }
 }
 
-// Setup della funzionalità di ricerca
+// ===================================================
+// SEARCH FUNCTIONALITY
+// ===================================================
+
 function setupSearch() {
   const searchLink = document.getElementById('search-link');
   const searchBox = document.getElementById('search-box');
   const searchInput = document.getElementById('search-input');
 
   if (searchLink && searchBox && searchInput) {
-    // Mostra/nascondi il campo di ricerca quando si clicca su "Cerca"
     searchLink.addEventListener('click', function(e) {
       e.preventDefault();
       if (searchBox.style.display === 'none' || searchBox.style.display === '') {
@@ -254,12 +253,10 @@ function setupSearch() {
       }
     });
 
-    // Esegui la ricerca quando l'utente preme Invio nel campo di ricerca
     searchInput.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         const query = e.target.value.trim();
         if (query) {
-          // Redirect alla homepage con parametro di ricerca
           window.location.href = `index.html?search=${encodeURIComponent(query)}`;
         }
       }
@@ -267,52 +264,86 @@ function setupSearch() {
   }
 }
 
-// Load player bar with a track when artist page loads
+function setupMobileSearch() {
+  const mobileSearchLink = document.getElementById('mobile-search-link');
+  const mobileSearchBox = document.getElementById('mobile-search-box');
+  const mobileSearchInput = document.getElementById('mobile-search-input');
+  const mobileSearchButton = document.getElementById('mobile-search-button');
+
+  if (mobileSearchLink && mobileSearchBox && mobileSearchInput) {
+    if (window.innerWidth < 992) {
+      mobileSearchLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = 'search.html';
+      });
+    } else {
+      mobileSearchLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (mobileSearchBox.style.display === 'none' || mobileSearchBox.style.display === '') {
+          mobileSearchBox.style.display = 'block';
+          mobileSearchInput.focus();
+        } else {
+          mobileSearchBox.style.display = 'none';
+        }
+      });
+    }
+
+    mobileSearchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        const query = e.target.value.trim();
+        if (query) {
+          if (window.innerWidth < 992) {
+            window.location.href = `search.html?search=${encodeURIComponent(query)}`;
+          } else {
+            window.location.href = `index.html?search=${encodeURIComponent(query)}`;
+          }
+        }
+      }
+    });
+
+    if (mobileSearchButton) {
+      mobileSearchButton.addEventListener('click', function() {
+        const query = mobileSearchInput.value.trim();
+        if (query) {
+          if (window.innerWidth < 992) {
+            window.location.href = `search.html?search=${encodeURIComponent(query)}`;
+          } else {
+            window.location.href = `index.html?search=${encodeURIComponent(query)}`;
+          }
+        }
+      });
+    }
+  }
+}
+
+// ===================================================
+// INITIALIZATION
+// ===================================================
+
 document.addEventListener('DOMContentLoaded', function() {
-  // Get artist ID from URL
   const urlParams = new URLSearchParams(window.location.search);
   const artistId = urlParams.get('id');
 
   if (artistId) {
     fetchArtistDetails(artistId);
-    // Also load a random track in the player bar
     fetchPlayerBarTrack();
   } else {
     showError("Artist ID not found in URL");
   }
 });
 
-// Fetch a random track for the player bar
-function fetchPlayerBarTrack() {
-  const popularArtists = ['Kendrick Lamar', 'Arctic Monkeys', 'Doja Cat', 'Post Malone', 'Mahmood', 'Maneskin'];
-  const randomArtist = popularArtists[Math.floor(Math.random() * popularArtists.length)];
-  const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/search?q=${randomArtist}&limit=1`;
+// ===================================================
+// UTILITY FUNCTIONS
+// ===================================================
 
-  fetch(apiUrl)
-    .then(response => {
-      if (!response.ok) throw new Error('Network response was not ok');
-      return response.json();
-    })
-    .then(data => {
-      if (data.data && data.data.length > 0) {
-        updatePlayerBar(data.data[0]);
-      }
-    })
-    .catch(error => console.error('Error fetching track for player bar:', error));
-}
-
-
-// Update the page title with artist name
 function updatePageTitle(artistName) {
   document.title = `${artistName} - Spotify Clone`;
 }
 
-// Format large numbers with commas
 function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 function showError(message) {
-    //This function is a stub and should be implemented properly for production
     console.error(message);
 }

@@ -13,6 +13,51 @@
   position: relative;
 }
 
+/* Ottimizzazione mobile per la pagina artist */
+@media (max-width: 768px) {
+  .artist-header {
+    height: auto;
+    min-height: 220px;
+    padding: 16px;
+    text-align: center;
+  }
+  
+  .artist-header .d-flex {
+    flex-direction: column;
+    align-items: center !important;
+  }
+  
+  .artist-header img.rounded-circle {
+    margin-bottom: 12px;
+    margin-right: 0 !important;
+    width: 100px;
+    height: 100px;
+  }
+  
+  .artist-header h1.display-4 {
+    font-size: 28px;
+  }
+  
+  .artist-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 10px !important;
+  }
+  
+  .popular-tracks, .discography {
+    padding: 0 16px !important;
+  }
+  
+  .popular-track {
+    grid-template-columns: 24px 1fr 60px !important;
+    padding: 8px !important;
+  }
+  
+  .popular-track-streams {
+    display: none;
+  }
+}
+
 .artist-header::before {
   content: '';
   position: absolute;
@@ -137,6 +182,27 @@
 
 .discography {
   padding: 0 32px;
+}
+
+@media (max-width: 768px) {
+  .discography .card-title {
+    font-size: 14px;
+  }
+  
+  .discography .card-text {
+    font-size: 12px;
+  }
+  
+  .discography .album-card {
+    padding: 10px;
+  }
+  
+  .album-card .play-hover {
+    right: 5px;
+    bottom: 75px;
+    width: 35px;
+    height: 35px;
+  }
 }
 
 .see-more-link {

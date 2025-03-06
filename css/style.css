@@ -50,12 +50,12 @@ body {
   font-weight: 500;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
   color: white;
 }
 
 .nav-link i {
-  margin-right: 12px;
   font-size: 1.2em;
 }
 
@@ -77,7 +77,6 @@ body {
 
 .main-header {
   padding: 16px 32px;
-  position: sticky;
   top: 0;
   backdrop-filter: blur(5px);
   z-index: 1000;
@@ -91,12 +90,40 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0,0,0,0.7);
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.user-profile-container {
+  display: inline-flex;
+  align-items: center;
+  background-color: #000000;
+  border-radius: 500px;
+  padding: 2px 12px 2px 2px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  max-width: fit-content;
+}
+
+.user-profile-container:hover {
+  background-color: #282828;
+}
+
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .user-name {
   color: white;
   font-weight: 600;
+  margin: 0 5px;
+}
+
+.bi-caret-down-fill {
+  font-size: 10px;
+  color: white;
 }
 
 /* Cards for albums and playlists */
@@ -159,7 +186,7 @@ body {
 
 /* Recent played cards */
 .recent-card {
-  background-color: rgba(255,255,255,0.1);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .recent-album-img {
@@ -169,62 +196,7 @@ body {
   border-radius: 4px;
 }
 
-/* Player bar */
-.player-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: var(--player-height);
-  background-color: var(--spotify-darker-black);
-  border-top: 1px solid #282828;
-  z-index: 2000;
-  padding: 16px;
-}
-
-.current-album-img {
-  width: 56px;
-  height: 56px;
-  object-fit: cover;
-  border-radius: 4px;
-}
-
-.track-info {
-  font-size: 14px;
-}
-
-.track-name {
-  font-weight: 500;
-  color: white;
-}
-
-.artist-name {
-  font-size: 12px;
-  color: var(--spotify-light-gray);
-}
-
-.player-controls .btn-link {
-  font-size: 1.2em;
-  padding: 0 12px;
-}
-
-.play-btn {
-  font-size: 2em !important;
-}
-
-.progress {
-  height: 4px;
-  background-color: #5a5a5a;
-}
-
-.progress-bar {
-  background-color: var(--spotify-green);
-}
-
-.current-time, .total-time {
-  font-size: 12px;
-  color: var(--spotify-light-gray);
-}
+/* Gli stili della player bar sono stati spostati in player.css */
 
 /* Album details page */
 .album-header {
@@ -237,7 +209,7 @@ body {
 .album-cover-lg {
   width: 232px;
   height: 232px;
-  box-shadow: 0 4px 60px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
 }
 
 .album-info {
@@ -292,7 +264,7 @@ body {
   grid-template-columns: 16px 1fr 16px;
   padding: 0 16px;
   margin-bottom: 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 8px;
 }
 
@@ -305,7 +277,7 @@ body {
 }
 
 .track-list-row:hover {
-  background-color: rgba(255,255,255,0.1);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .track-number {
@@ -334,7 +306,7 @@ body {
 }
 
 .friends-header {
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .friend-activity {
@@ -343,7 +315,7 @@ body {
 }
 
 .friend-activity:hover {
-  background-color: rgba(255,255,255,0.1);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .friend-activity img {
@@ -358,7 +330,8 @@ body {
   font-weight: 500;
 }
 
-.friend-status, .friend-extra {
+.friend-status,
+.friend-extra {
   font-size: 12px;
 }
 
@@ -378,10 +351,97 @@ body {
 
   .main-content {
     width: 100%;
+    height: calc(100vh - var(--player-height));
   }
 
   .friends-sidebar {
     display: none;
+  }
+}
+
+@media (max-width: 992px) {
+  .main-content {
+    padding: 0;
+    margin-bottom: 90px;
+    /* Spazio per la player bar mobile */
+  }
+
+  .main-header {
+    display: none;
+    /* Nascondi l'header sui dispositivi da 992px in giù */
+  }
+
+  .container-fluid {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .row {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  /* Ottimizzazioni per index in mobile */
+  #content-area {
+    padding: 12px !important;
+  }
+
+  .featured-album-container {
+    padding: 10px;
+  }
+
+  .featured-album-details {
+    padding: 10px 0;
+  }
+
+  .featured-album-container .row {
+    flex-direction: column;
+  }
+
+  .featured-album-container .col-md-3 {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .featured-album-container .col-md-9 {
+    width: 100%;
+  }
+
+  .featured-album-details h1 {
+    font-size: 28px !important;
+  }
+
+  .featured-album-details .d-flex {
+    flex-wrap: wrap;
+  }
+
+  .featured-album-details .d-flex button {
+    margin-bottom: 10px;
+  }
+
+  /* Aggiustamenti per le sezioni di album */
+  #album-list .col-6 {
+    padding: 5px;
+  }
+
+  .album-card {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .album-card .play-hover {
+    right: 5px;
+    bottom: 75px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .card-title {
+    font-size: 14px;
+  }
+
+  .card-text {
+    font-size: 12px;
   }
 }
 
@@ -506,4 +566,58 @@ body {
 
 #search-input::placeholder {
   color: #b3b3b3;
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #000;
+  padding: 10px 0;
+  width: 100%;
+}
+
+.mobile-nav .nav-item {
+  flex: 1;
+}
+
+.mobile-nav .nav-link {
+  color: #b3b3b3;
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.mobile-nav .nav-link.active {
+  color: white;
+}
+
+.mobile-nav .bi {
+  font-size: 1.5rem;
+}
+
+.mobile-search-container {
+  background-color: #282828;
+  padding: 10px;
+  position: fixed;
+  bottom: 90px;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+}
+
+/* Stili per le icone nella sezione Buonasera */
+.btn-link i.bi {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 992px) {
+  .btn-link i.bi {
+    font-size: 1.4rem;
+  }
+}
+
+.btn-dark {
+  background-color: transparent;
+  border: none;
 }

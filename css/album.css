@@ -12,6 +12,63 @@
   background: linear-gradient(to bottom, #8a8a8a, var(--spotify-black) 85%);
 }
 
+/* Ottimizzazione mobile per album page */
+@media (max-width: 768px) {
+  .album-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 16px;
+  }
+  
+  .album-info {
+    margin-left: 0 !important;
+    margin-top: 16px;
+    width: 100%;
+  }
+  
+  .album-info .album-title {
+    font-size: 24px !important;
+  }
+  
+  .album-info .album-details {
+    justify-content: center;
+  }
+  
+  .album-actions {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .album-cover-lg {
+    width: 180px !important;
+    height: 180px !important;
+  }
+  
+  .track-list {
+    padding: 0 16px;
+  }
+  
+  .track-list-row {
+    grid-template-columns: 24px 1fr 60px !important;
+    padding: 8px 8px;
+  }
+  
+  .track-title, .track-artist {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .track-list-header {
+    grid-template-columns: 24px 1fr 60px !important;
+  }
+
+  .track-actions {
+    display: none;
+  }
+}
+
 .album-cover-lg {
   width: 232px;
   height: 232px;

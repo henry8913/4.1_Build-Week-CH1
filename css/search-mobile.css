@@ -1,0 +1,161 @@
+/* Stile per la pagina di ricerca su dispositivi mobili */
+.search-page {
+  background-color: #121212;
+  color: white;
+  padding: 16px;
+  min-height: 100vh;
+  padding-bottom: 80px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.search-page h1 {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.search-input-container {
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.search-input-container .bi-search {
+  color: white;
+  font-size: 20px;
+  margin-right: 10px;
+}
+
+.search-input-mobile {
+  background: none;
+  border: none;
+  color: white;
+  width: 100%;
+  font-size: 16px;
+  outline: none;
+}
+
+.search-input-mobile::placeholder {
+  color: #999;
+}
+
+.search-section-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.search-categories {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.category-card {
+  border-radius: 8px;
+  height: 100px;
+  display: flex;
+  align-items: flex-end;
+  padding: 12px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.category-card img {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 60px;
+  height: 60px;
+  transform: rotate(25deg);
+  object-fit: cover;
+}
+
+.podcast {
+  background-color: #FF4500;
+}
+
+.create {
+  background-color: #1E3A8A;
+}
+
+.nuove-uscite {
+  background-color: #E91E63;
+}
+
+.pop {
+  background-color: #4CAF50;
+}
+
+.hip-hop {
+  background-color: #D2691E;
+}
+
+.dance {
+  background-color: #FF7F50;
+}
+
+.latina {
+  background-color: #E91E63;
+}
+
+.classifiche {
+  background-color: #8E44AD;
+}
+
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #000;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  z-index: 1000;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #B3B3B3;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.mobile-nav-item.active {
+  color: white;
+}
+
+.mobile-nav-item i {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+#search-results {
+  overflow-y: auto;
+  padding-bottom: 60px;
+  margin-bottom: 20px;
+}
+
+body.search-page-active {
+  overflow-y: auto;
+  height: auto;
+}
+
+/* Nasconde la pagina di ricerca su desktop */
+@media (min-width: 992px) {
+  .search-page {
+    display: none;
+  }
+}
