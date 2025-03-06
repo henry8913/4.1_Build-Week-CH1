@@ -2,11 +2,13 @@
 # 🎵 Spotify Clone 🎧
 
 Questo progetto è un **clone di Spotify** che permette di cercare artisti e visualizzare le loro tracce utilizzando l'API di **Deezer**.  
-L'interfaccia è stata sviluppata con **Bootstrap**, **JavaScript** e **CSS**, ed è attualmente ottimizzata **solo per dispositivi con larghezza superiore a 1024px**.
+L'interfaccia è stata sviluppata con **Bootstrap**, **JavaScript** e **CSS**, ed è completamente **responsive** per funzionare su tutti i dispositivi.
 
 <p align="center">
-    <img src="img/cover_b.gif" alt="Cover" width="100%" />
+    <img src="img/cover_e.jpg" alt="Cover" width="100%" />
 </p>
+
+Per visualizzare la demo del sito live, clicca [QUI](https://4-1-build-week-ch-1.vercel.app/).
 
 ---
 
@@ -17,18 +19,19 @@ L'interfaccia è stata sviluppata con **Bootstrap**, **JavaScript** e **CSS**, e
 - 🎵 **Pagine artista**: Visualizza la biografia e i brani più popolari degli artisti.
 - 💿 **Pagine album**: Visualizza tutti i brani di un album specifico con dettagli.
 - 📌 **Sidebar e navigazione**: Una barra laterale per navigare tra le diverse sezioni del sito.
-- 🖥️ **Design per desktop**: Il layout è stato sviluppato per funzionare **solo su schermi con larghezza superiore a 1024px**.
+- 📱 **Design responsive**: Il layout è stato ottimizzato per funzionare su tutti i dispositivi, dai telefoni mobili ai desktop.
 
 ---
 
 ## 🚀 Tecnologie Utilizzate
 - **HTML5** - Struttura della pagina web.
 - **CSS3** - Stile e layout.
-- **Bootstrap 5** - Framework CSS per una UI moderna.
+- **Bootstrap 5** - Framework CSS per una UI moderna e responsive.
 - **JavaScript (ES6+)** - Logica di interazione e chiamate API.
 - **Fetch API** - Per recuperare dati dall'API di Deezer.
 - **Deezer API** - Fonte dei dati musicali.
 - **Bootstrap Icons** - Icone interattive.
+- **Media Queries** - Per garantire un'esperienza ottimale su tutti i dispositivi.
 
 ---
 
@@ -54,19 +57,19 @@ L'interfaccia è stata sviluppata con **Bootstrap**, **JavaScript** e **CSS**, e
 
 ---
 
-## ❌ Limitazioni Attuali
-🚨 **Il sito NON è ancora ottimizzato per dispositivi mobili o tablet**.  
-📌 Attualmente, il design funziona correttamente **solo su schermi sopra i 1024px**.  
-📌 Il supporto per risoluzioni più piccole sarà aggiunto in futuro con layout responsive.  
+## 📱 Compatibilità
+✅ **Desktop**: Ottimizzato per schermi di tutte le dimensioni  
+✅ **Tablet**: Interfaccia adattata per esperienza d'uso ottimale  
+✅ **Mobile**: Layout specifico per smartphone con navigazione semplificata  
 
 ---
 
 ## 🎯 Obiettivi del Progetto
 👉 Migliorare la comprensione delle **API REST** con **fetch()**  
 👉 Scrivere codice **JavaScript moderno e modulare**  
-👉 Creare **un'interfaccia desktop-friendly**  
+👉 Creare **un'interfaccia responsive e user-friendly**  
 👉 Approfondire **concetti avanzati di JavaScript e AJAX**  
-👉 **Prossimo step**: Aggiungere supporto **responsive** per mobile e tablet  
+👉 Garantire un'esperienza utente ottimale su tutti i dispositivi
 
 ---
 
