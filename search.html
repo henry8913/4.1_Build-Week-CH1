@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="it">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cerca - Spotify Clone</title>
+
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="Spotify Clone - Team 1">
+  <meta property="og:description"
+    content="Spotify Clone - Ascolta la tua musica preferita, crea playlist e scopri nuovi brani.">
+  <meta property="og:image"
+    content="https://raw.githubusercontent.com/henry8913/4.1_Build-Week-CH1/refs/heads/Team-1/img/cover_c.jpg">
+  <meta property="og:url" content="https://henrygdeveloper.com">
+  <meta property="og:type" content="website">
+
+  <!-- favicon -->
+  <link rel="icon" type="image/png" href="img/favicon.png">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link href="css/style.css" rel="stylesheet">
+  <link href="css/player.css" rel="stylesheet">
+  <link href="css/search-mobile.css" rel="stylesheet">
+</head>
+
+<body class="search-page-active">
+  <div class="search-page">
+    <h1>Cerca</h1>
+
+    <div class="search-input-container">
+      <i class="bi bi-search"></i>
+      <input type="text" class="search-input-mobile" placeholder="Cosa vuoi ascoltare?" id="mobile-search-query">
+    </div>
+
+    <div>
+      <div id="search-results" class="mt-4">
+        <!-- I risultati di ricerca saranno inseriti qui -->
+      </div>
+
+      <p class="search-section-title">Sfoglia tutto</p>
+      <div class="search-categories">
+        <div class="category-card podcast">
+          <span>Podcast</span>
+          <img src="https://i.pinimg.com/736x/de/6d/9d/de6d9d40ad5f4ca6b519fd29000775c6.jpg" alt="Podcast">
+        </div>
+        <div class="category-card create">
+          <span>Create per te</span>
+          <img src="https://i.pinimg.com/736x/c1/90/3b/c1903b54b02b86b0062fdd247c0e1ed6.jpg" alt="Create per te">
+        </div>
+        <div class="category-card nuove-uscite">
+          <span>Nuove uscite</span>
+          <img src="https://i.pinimg.com/736x/ae/18/d6/ae18d636caad14a8824fdc93622cfedf.jpg" alt="Nuove uscite">
+        </div>
+        <div class="category-card pop">
+          <span>Pop</span>
+          <img src="https://i.pinimg.com/736x/56/14/68/561468b31eed008ad5c03bd776dc3380.jpg" alt="Pop">
+        </div>
+        <div class="category-card hip-hop">
+          <span>Hip Hop</span>
+          <img src="https://i.pinimg.com/736x/2d/26/c2/2d26c2d50ae2b4eaeaadc7706896ebe4.jpg" alt="Hip Hop">
+        </div>
+        <div class="category-card dance">
+          <span>Dance/ Elettronica</span>
+          <img src="https://i.pinimg.com/736x/57/1a/84/571a840678559f8159d8508a390d34b7.jpg" alt="Dance">
+        </div>
+        <div class="category-card latina">
+          <span>Latina</span>
+          <img src="https://i.pinimg.com/736x/f0/9e/41/f09e4125c0f9f86bf47d1db81dd75caa.jpg" alt="Latina">
+        </div>
+        <div class="category-card classifiche">
+          <span>Classifiche</span>
+          <img src="https://i.pinimg.com/736x/54/38/03/543803e5d6c93e60bc9449a4955b47f0.jpg" alt="Classifiche">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Mobile Navigation Bar -->
+  <div class="mobile-nav">
+    <a href="index.html" class="mobile-nav-item">
+      <i class="bi bi-house-door"></i>
+      <span>Home</span>
+    </a>
+    <a href="search.html" class="mobile-nav-item active">
+      <i class="bi bi-search"></i>
+      <span>Cerca</span>
+    </a>
+    <a href="#" class="mobile-nav-item">
+      <i class="bi bi-collection"></i>
+      <span>La tua libreria</span>
+    </a>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+  <script src="js/search.js"></script>
+  <script src="js/player.js"></script>
+</body>
+
+</html>
