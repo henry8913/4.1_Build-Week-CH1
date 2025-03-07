@@ -1,4 +1,7 @@
 
+// ===================================================
+// INITIALIZATION AND EVENT LISTENERS
+// ===================================================
 document.addEventListener('DOMContentLoaded', function() {
   document.body.classList.add('search-page-active');
   

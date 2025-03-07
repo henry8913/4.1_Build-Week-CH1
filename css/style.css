@@ -363,12 +363,10 @@ body {
   .main-content {
     padding: 0;
     margin-bottom: 90px;
-    /* Spazio per la player bar mobile */
   }
 
   .main-header {
     display: none;
-    /* Nascondi l'header sui dispositivi da 992px in giù */
   }
 
   .container-fluid {

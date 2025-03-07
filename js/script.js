@@ -1,4 +1,7 @@
 
+// ===================================================
+// INITIALIZATION AND EVENT LISTENERS
+// ===================================================
 document.addEventListener('DOMContentLoaded', function() {
   fetchFeaturedAlbum();
   fetchRecentlyPlayed();
@@ -7,13 +10,104 @@ document.addEventListener('DOMContentLoaded', function() {
   fetchPlayerBarTrack(); 
 
   setupSearch();
+  
+  if (window.musicPlayer) {
+    const audioPlayer = document.querySelector('audio');
+    if (audioPlayer) {
+      audioPlayer.addEventListener('ended', function() {
+        window.musicPlayer.playNext();
+      });
+    }
+  }
 
   document.addEventListener('click', function(e) {
     if (e.target.closest('.play-hover')) {
       e.preventDefault();
       const albumElement = e.target.closest('.album-card');
       if (albumElement && albumElement.dataset.albumId) {
-        loadAlbumDetails(albumElement.dataset.albumId);
+        if (albumElement.dataset.previewUrl && window.musicPlayer) {
+          const trackInfo = {
+            title: albumElement.querySelector('.card-title').textContent,
+            artist: {
+              name: albumElement.querySelector('.card-text a').textContent,
+              id: albumElement.querySelector('.card-text a').href.split('=')[1]
+            },
+            album: {
+              cover_small: albumElement.querySelector('.card-img-top').src
+            },
+            preview: albumElement.dataset.previewUrl,
+            duration: 30
+          };
+          
+          const parentSection = albumElement.closest('#album-list, #trending-container');
+          
+          if (parentSection) {
+            const playlist = [];
+            parentSection.querySelectorAll('.album-card').forEach(card => {
+              if (card.dataset.previewUrl) {
+                playlist.push({
+                  title: card.querySelector('.card-title').textContent,
+                  artist: {
+                    name: card.querySelector('.card-text a').textContent,
+                    id: card.querySelector('.card-text a').href.split('=')[1]
+                  },
+                  album: {
+                    cover_small: card.querySelector('.card-img-top').src
+                  },
+                  preview: card.dataset.previewUrl,
+                  duration: 30
+                });
+              }
+            });
+            
+            window.musicPlayer.setPlaylist(playlist);
+            
+            const currentIndex = playlist.findIndex(track => track.preview === albumElement.dataset.previewUrl);
+            if (currentIndex !== -1) {
+              currentTrackIndex = currentIndex;
+            }
+          } else {
+            window.musicPlayer.setPlaylist([trackInfo]);
+          }
+          
+          window.musicPlayer.play(albumElement.dataset.previewUrl, trackInfo);
+          return;
+        } else {
+          loadAlbumDetails(albumElement.dataset.albumId);
+        }
+      }
+    }
+    
+    if (e.target.closest('.play-btn') && window.musicPlayer) {
+      const playButton = e.target.closest('.play-btn');
+      if (window.musicPlayer.getCurrentTrack()) {
+        if (window.musicPlayer.isPlaying()) {
+          window.musicPlayer.pause();
+        } else {
+          window.musicPlayer.play(window.musicPlayer.getCurrentTrack());
+        }
+      }
+    }
+
+    if (e.target.closest('#featured-album .btn-success')) {
+      e.preventDefault();
+      const featuredAlbum = document.getElementById('featured-album');
+      if (featuredAlbum && featuredAlbum.dataset.previewUrl && window.musicPlayer) {
+        const trackInfo = {
+          title: document.getElementById('featured-album-title').textContent,
+          artist: {
+            name: document.getElementById('featured-album-artist').textContent.trim(),
+            id: featuredAlbum.dataset.artistId || ''
+          },
+          album: {
+            cover_small: document.getElementById('featured-album-img').src
+          },
+          preview: featuredAlbum.dataset.previewUrl
+        };
+        
+        const playlist = [trackInfo];
+        window.musicPlayer.setPlaylist(playlist);
+        window.musicPlayer.play(featuredAlbum.dataset.previewUrl, trackInfo);
       }
     }
 
@@ -21,6 +115,47 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       const recentCard = e.target.closest('.recent-card');
       if (recentCard && recentCard.dataset.albumId) {
+        if (recentCard.dataset.previewUrl && window.musicPlayer) {
+          const trackInfo = {
+            title: recentCard.querySelector('.fw-bold').textContent,
+            artist: {
+              name: recentCard.querySelector('.text-white-50').textContent,
+              id: ''
+            },
+            album: {
+              cover_small: recentCard.querySelector('.recent-album-img').src
+            },
+            preview: recentCard.dataset.previewUrl
+          };
+          
+          const playlist = [];
+          document.querySelectorAll('.recent-card').forEach(card => {
+            if (card.dataset.previewUrl) {
+              playlist.push({
+                title: card.querySelector('.fw-bold').textContent,
+                artist: {
+                  name: card.querySelector('.text-white-50').textContent,
+                  id: ''
+                },
+                album: {
+                  cover_small: card.querySelector('.recent-album-img').src
+                },
+                preview: card.dataset.previewUrl,
+                duration: 30
+              });
+            }
+          });
+          
+          window.musicPlayer.setPlaylist(playlist);
+          
+          const currentIndex = playlist.findIndex(track => track.preview === recentCard.dataset.previewUrl);
+          if (currentIndex !== -1) {
+            currentTrackIndex = currentIndex;
+          }
+          
+          window.musicPlayer.play(recentCard.dataset.previewUrl, trackInfo);
+          return;
+        }
         loadAlbumDetails(recentCard.dataset.albumId);
       }
     }
@@ -297,7 +432,14 @@ function displayRecentlyPlayed(items) {
             <span class="d-block text-truncate small text-white-50">${item.artist.name}</span>
           </div>
         `;
-      recentCards[i].closest('.recent-card').dataset.albumId = item.album.id;
+      const card = recentCards[i].closest('.recent-card');
+      card.dataset.albumId = item.album.id;
+      
+      if (item.preview) {
+        card.dataset.previewUrl = item.preview;
+      }
+      
+      card.style.cursor = 'pointer';
     } else {
       console.error("Missing data in recently played item:", item);
       recentCards[i].innerHTML = "<p>Data not available</p>";
@@ -326,6 +468,10 @@ function displayTrendingMusic(items) {
         `;
 
       card.dataset.albumId = item.album.id;
+      
+      if (item.preview) {
+        card.dataset.previewUrl = item.preview;
+      }
     } else {
       console.error("Missing data in trending music item:", item);
       if (card) card.innerHTML = "<p>Data not available</p>";
@@ -339,10 +485,19 @@ function displayFeaturedAlbum(item) {
     return;
   }
 
+  const featuredAlbumContainer = document.getElementById('featured-album');
   const featuredAlbumImg = document.getElementById('featured-album-img');
   const featuredAlbumTitle = document.getElementById('featured-album-title');
   const featuredAlbumArtist = document.getElementById('featured-album-artist');
   const featuredAlbumDescription = document.getElementById('featured-album-description');
+
+  if (featuredAlbumContainer) {
+    featuredAlbumContainer.dataset.albumId = item.album.id;
+    featuredAlbumContainer.dataset.artistId = item.artist.id;
+    if (item.preview) {
+      featuredAlbumContainer.dataset.previewUrl = item.preview;
+    }
+  }
 
   if (featuredAlbumImg) {
     if (window.innerWidth <= 768) {
@@ -379,6 +534,11 @@ function displayFeaturedAlbum(item) {
     featuredAlbumBg.style.backgroundSize = 'cover';
     featuredAlbumBg.style.backgroundPosition = 'center';
   }
+
+  const playButton = featuredAlbumContainer.querySelector('.btn-success');
+  if (playButton) {
+    playButton.style.cursor = 'pointer';
+  }
 }
 
 function displayAlbums(albums) {
@@ -405,8 +565,11 @@ function displayAlbums(albums) {
   uniqueAlbums.slice(0, 12).forEach(item => {
     const albumElement = document.createElement('div');
     albumElement.className = 'col-6 col-sm-4 col-md-3 col-lg-2';
+    
+    const previewUrlAttr = item.preview ? `data-preview-url="${item.preview}"` : '';
+    
     albumElement.innerHTML = `
-      <div class="card album-card position-relative" data-album-id="${item.album.id}">
+      <div class="card album-card position-relative" data-album-id="${item.album.id}" ${previewUrlAttr}>
         <img src="${item.album.cover_medium}" class="card-img-top" alt="${item.album.title}">
         <div class="play-hover">
           <i class="bi bi-play-fill"></i>
