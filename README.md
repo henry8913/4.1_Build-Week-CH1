@@ -1,79 +1,108 @@
+<h1 align="center">
+    <img src="https://readme-typing-svg.herokuapp.com/?font=Iosevka&size=24&color=1DB954&center=true&vCenter=true&width=1200&height=60&lines=🎵+Spotify+Clone+|+La+tua+musica%2C+ovunque+tu+sia+🎧" alt="🎵 Spotify Clone | La tua musica, ovunque tu sia 🎧">
+</h1>
 
-# 🎵 Spotify Clone 🎧
+Un'elegante replica dell'interfaccia di Spotify che permette di cercare artisti, visualizzare album e riprodurre anteprime di brani utilizzando l'API di Deezer.
 
-Questo progetto è un **clone di Spotify** che permette di cercare artisti e visualizzare le loro tracce utilizzando l'API di **Deezer**.  
-L'interfaccia è stata sviluppata con **Bootstrap**, **JavaScript** e **CSS**, ed è completamente **responsive** per funzionare su tutti i dispositivi.
+![Spotify Clone](img/cover_d.jpg)
 
-<p align="center">
-    <img src="img/cover_e.jpg" alt="Cover" width="100%" />
-</p>
+**👉 [Visualizza la versione live del progetto](https://4-1-build-week-ch-1.vercel.app/)**
 
-Per visualizzare la demo del sito live, clicca [QUI](https://4-1-build-week-ch-1.vercel.app/).
+## 📋 Descrizione
 
----
-
-## 📌 Funzionalità Principali
-- 🔍 **Ricerca brani**: Gli utenti possono cercare artisti e visualizzare i loro brani.
-- 🎶 **Album in evidenza**: Al caricamento della pagina, viene mostrato un album in evidenza con informazioni dettagliate.
-- 🏷️ **Visualizzazione degli album**: Le copertine degli album sono mostrate con i titoli delle tracce.
-- 🎵 **Pagine artista**: Visualizza la biografia e i brani più popolari degli artisti.
-- 💿 **Pagine album**: Visualizza tutti i brani di un album specifico con dettagli.
-- 📌 **Sidebar e navigazione**: Una barra laterale per navigare tra le diverse sezioni del sito.
-- 📱 **Design responsive**: Il layout è stato ottimizzato per funzionare su tutti i dispositivi, dai telefoni mobili ai desktop.
-
----
+Questo progetto è un clone di Spotify che replica l'esperienza utente dell'app originale. Sviluppato con tecnologie web moderne, offre un'interfaccia reattiva e user-friendly che funziona su tutti i dispositivi. Utilizza l'API di Deezer per accedere a un vasto catalogo musicale.
 
 ## 🚀 Tecnologie Utilizzate
-- **HTML5** - Struttura della pagina web.
-- **CSS3** - Stile e layout.
-- **Bootstrap 5** - Framework CSS per una UI moderna e responsive.
-- **JavaScript (ES6+)** - Logica di interazione e chiamate API.
-- **Fetch API** - Per recuperare dati dall'API di Deezer.
-- **Deezer API** - Fonte dei dati musicali.
-- **Bootstrap Icons** - Icone interattive.
-- **Media Queries** - Per garantire un'esperienza ottimale su tutti i dispositivi.
 
----
+- **HTML5**: Struttura semantica del documento web
+- **CSS3**: Stile e layout responsivo
+- **JavaScript (ES6+)**: Logica di interazione e chiamate API
+- **Bootstrap 5**: Framework CSS per un'interfaccia moderna e responsive
+- **Fetch API**: Per effettuare richieste asincrone all'API di Deezer
+- **Deezer API**: Fornitura di dati musicali (artisti, album, brani)
+- **Bootstrap Icons**: Set di icone per migliorare l'interfaccia utente
+- **Media Queries**: Adattamento dell'interfaccia a diverse dimensioni di schermo
 
-## 📌 Struttura del Progetto
-📂 **index.html** - Homepage con album in evidenza e contenuti suggeriti.  
-📂 **artist.html** - Pagina dettaglio artista.  
-📂 **album.html** - Pagina dettaglio album.  
-📂 **css/** - Fogli di stile per le diverse pagine.  
-📂 **js/** - Script JavaScript per gestire l'interazione e le chiamate API.  
-📂 **img/** - Immagini e risorse grafiche.
+## ⚙️ Caratteristiche
 
----
+- Ricerca di artisti, album e brani tramite integrazione con API Deezer
+- Riproduzione di anteprime audio con controlli del player
+- Visualizzazione dettagliata di artisti con biografia e brani popolari
+- Esplorazione di album con tracklist completa
+- Player musicale completo con controlli di riproduzione
+- Mini-player mobile per un'esperienza ottimizzata su smartphone
+- Funzionalità di passaggio automatico alla traccia successiva
+- Layout completamente responsive per tutti i dispositivi
+- Navigazione tramite sidebar con playlist suggerite
 
-## ⚙️ Setup & Utilizzo
-1. **Clona il repository**  
-   ```sh
-   git clone https://github.com/tuouser/spotify-clone.git
-   ```
-2. **Apri `index.html` nel browser**  
-3. **Effettua una ricerca** utilizzando la barra di ricerca.  
+## 🛠️ Installazione
 
-🔹 Il progetto è completamente **client-side**, quindi non necessita di un server per essere eseguito.
+```bash
+# Clona il repository
+git clone https://github.com/tuousername/spotify-clone.git
 
----
+# Naviga nella directory del progetto
+cd spotify-clone
 
-## 📱 Compatibilità
-✅ **Desktop**: Ottimizzato per schermi di tutte le dimensioni  
-✅ **Tablet**: Interfaccia adattata per esperienza d'uso ottimale  
-✅ **Mobile**: Layout specifico per smartphone con navigazione semplificata  
+# Apri il file index.html nel tuo browser
+# Oppure utilizza un server locale come Live Server
+```
 
----
+## 🖥️ Utilizzo
 
-## 🎯 Obiettivi del Progetto
-👉 Migliorare la comprensione delle **API REST** con **fetch()**  
-👉 Scrivere codice **JavaScript moderno e modulare**  
-👉 Creare **un'interfaccia responsive e user-friendly**  
-👉 Approfondire **concetti avanzati di JavaScript e AJAX**  
-👉 Garantire un'esperienza utente ottimale su tutti i dispositivi
+Il progetto è completamente client-side e può essere utilizzato aprendo il file `index.html` in un browser. Le principali funzionalità includono:
 
----
+- **Home**: Visualizza album in evidenza e contenuti suggeriti
+- **Pagina Artista**: Esplora biografia, brani popolari e album di un artista
+- **Pagina Album**: Visualizza tutti i brani contenuti in un album specifico
+- **Ricerca**: Cerca artisti e brani utilizzando la barra di ricerca
+- **Player**: Controlla la riproduzione dei brani con il player integrato
+
+## 📸 Screenshot
+
+![Spotify Clone Mobile](img/screenshot.png)
+
+## 💻 Struttura del Progetto
+
+```
+spotify-clone/
+├── css/                # Fogli di stile
+│   ├── style.css       # Stili globali
+│   ├── player.css      # Stili del player
+│   ├── album.css       # Stili pagina album
+│   ├── artist.css      # Stili pagina artista
+│   └── search-mobile.css  # Stili mobile per ricerca
+├── js/                 # Script JavaScript
+│   ├── script.js       # Script principale
+│   ├── player.js       # Logica del player
+│   ├── album.js        # Gestione pagina album
+│   ├── artist.js       # Gestione pagina artista
+│   └── search.js       # Funzionalità di ricerca
+├── img/                # Immagini e risorse
+├── index.html          # Homepage
+├── album.html          # Pagina album
+├── artist.html         # Pagina artista
+└── search.html         # Pagina di ricerca
+```
 
 ## 🤝 Contributi
-Contributi e suggerimenti sono i benvenuti! Apri una **issue** o fai un **pull request**.
+
+Le contribuzioni sono sempre benvenute! Apri una **issue** o invia un **pull request** per suggerire modifiche.
+
+### 👨‍💻 Contributori
+
+- [PaolaTaralloo](https://github.com/PaolaTaralloo)
+- [SPIRIDION](https://github.com/SPIRIDION)
+- [majoralpaca984](https://github.com/majoralpaca984)
+- [henry8913](https://github.com/henry8913)
+- [SilkySmooth91](https://github.com/SilkySmooth91)
 
 ---
+
+## 👤 Autori
+
+Progetto demo creato da [Team 1 - 4.1 Build Week CH1](https://4-1-build-week-ch-1.vercel.app/) per scopi didattici.
+
+## 📝 Licenza
+
+Questo progetto è distribuito sotto licenza [MIT](LICENSE.txt). Vedi il file `LICENSE.txt` per ulteriori dettagli.

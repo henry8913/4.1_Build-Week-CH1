@@ -1,4 +1,6 @@
-
+// ===================================================
+// INITIALIZATION AND EVENT LISTENERS
+// ===================================================
 document.addEventListener('DOMContentLoaded', function() {
   const urlParams = new URLSearchParams(window.location.search);
   const artistId = urlParams.get('id');
@@ -54,6 +56,15 @@ function fetchArtistTopTracks(artistId) {
     })
     .then(data => {
       displayArtistTopTracks(data.data);
+      
+      if (window.musicPlayer) {
+        const audioPlayer = document.querySelector('audio');
+        if (audioPlayer) {
+          audioPlayer.addEventListener('ended', function() {
+            window.musicPlayer.playNext();
+          });
+        }
+      }
     })
     .catch(error => {
       console.error('Error fetching artist top tracks:', error);
@@ -160,7 +171,7 @@ function displayArtistTopTracks(tracks) {
     const seconds = track.duration % 60;
 
     tracksHTML += `
-      <div class="popular-track">
+      <div class="popular-track" data-preview-url="${track.preview}" data-track-index="${index}">
         <div class="popular-track-number">${index + 1}</div>
         <div class="popular-track-info">
           <img src="${track.album.cover_small}" alt="${track.album.title}" class="popular-track-img">
@@ -175,6 +186,91 @@ function displayArtistTopTracks(tracks) {
   });
 
   topTracksContainer.innerHTML = tracksHTML;
+
+  const topTracks = document.querySelectorAll('.popular-track');
+  topTracks.forEach(track => {
+    track.style.cursor = 'pointer';
+    track.addEventListener('click', function() {
+      const previewUrl = this.dataset.previewUrl;
+      const trackIndex = parseInt(this.dataset.trackIndex);
+      if (previewUrl && window.musicPlayer && tracks[trackIndex]) {
+        const playlist = tracks.map(track => {
+          return {
+            title: track.title,
+            preview: track.preview,
+            artist: {
+              name: track.artist.name,
+              id: track.artist.id
+            },
+            album: {
+              cover_small: track.album.cover_small
+            },
+            duration: track.duration
+          };
+        });
+
+        window.musicPlayer.setPlaylist(playlist);
+
+        const track = tracks[trackIndex];
+        const trackInfo = {
+          title: track.title,
+          artist: {
+            name: track.artist.name,
+            id: track.artist.id
+          },
+          album: {
+            cover_small: track.album.cover_small
+          },
+          duration: track.duration
+        };
+        window.musicPlayer.play(previewUrl, trackInfo);
+      }
+    });
+  });
+
+  const artistPlayBtn = document.querySelector('.artist-actions .btn-play');
+  if (artistPlayBtn && tracks[0] && tracks[0].preview && window.musicPlayer) {
+    artistPlayBtn.addEventListener('click', function() {
+      const playlist = tracks.map(track => {
+        return {
+          title: track.title,
+          preview: track.preview,
+          artist: {
+            name: track.artist.name,
+            id: track.artist.id
+          },
+          album: {
+            cover_small: track.album.cover_small
+          },
+          duration: track.duration
+        };
+      });
+      
+      window.musicPlayer.setPlaylist(playlist);
+      
+      const trackInfo = {
+        title: tracks[0].title,
+        artist: {
+          name: tracks[0].artist.name,
+          id: tracks[0].artist.id
+        },
+        album: {
+          cover_small: tracks[0].album.cover_small
+        },
+        duration: tracks[0].duration
+      };
+      window.musicPlayer.play(tracks[0].preview, trackInfo);
+      
+      if (window.musicPlayer) {
+        const audioPlayer = document.querySelector('audio');
+        if (audioPlayer) {
+          audioPlayer.addEventListener('ended', function() {
+            window.musicPlayer.playNext();
+          });
+        }
+      }
+    });
+  }
 }
 
 function displayArtistAlbums(albums) {

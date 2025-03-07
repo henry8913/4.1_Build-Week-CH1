@@ -1,4 +1,6 @@
-
+// ===================================================
+// INITIALIZATION AND EVENT LISTENERS
+// ===================================================
 document.addEventListener('DOMContentLoaded', function() {
   const urlParams = new URLSearchParams(window.location.search);
   const albumId = urlParams.get('id');
@@ -76,7 +78,7 @@ function displayAlbumDetails(album) {
     </div>
 
     <div class="album-actions p-4">
-      <button class="btn btn-success rounded-pill btn-play"><i class="bi bi-play-fill"></i> Play</button>
+      <button class="btn btn-success rounded-pill btn-play" id="album-play-btn"><i class="bi bi-play-fill"></i> Play</button>
       <button class="btn btn-outline-light rounded-pill btn-save"><i class="bi bi-heart"></i> Salva</button>
       <button class="btn btn-link text-white"><i class="bi bi-three-dots"></i></button>
     </div>
@@ -92,7 +94,7 @@ function displayAlbumDetails(album) {
         const minutes = Math.floor(track.duration / 60);
         const seconds = track.duration % 60;
         return `
-          <div class="track-list-row">
+          <div class="track-list-row" data-preview-url="${track.preview}" data-track-id="${track.id}">
             <div class="track-number">${index + 1}</div>
             <div class="track-title">${track.title}</div>
             <div class="track-artist">${track.artist.name}</div>
@@ -112,9 +114,99 @@ function displayAlbumDetails(album) {
     </div>
   `;
 
-  if (album.tracks && album.tracks.data && album.tracks.data.length > 0) {
-    updatePlayerBar(album.tracks.data[0], album);
+  const albumPlayBtn = document.getElementById('album-play-btn');
+  if (albumPlayBtn && window.musicPlayer) {
+    albumPlayBtn.addEventListener('click', function() {
+      const firstTrack = album.tracks.data[0];
+      if (firstTrack && firstTrack.preview) {
+        const playlist = album.tracks.data.map(track => {
+          return {
+            title: track.title,
+            preview: track.preview,
+            artist: {
+              name: track.artist.name,
+              id: track.artist.id
+            },
+            album: {
+              cover_small: album.cover_small
+            },
+            duration: track.duration
+          };
+        });
+        
+        window.musicPlayer.setPlaylist(playlist);
+        
+        const trackInfo = {
+          title: firstTrack.title,
+          artist: {
+            name: firstTrack.artist.name,
+            id: firstTrack.artist.id
+          },
+          album: {
+            cover_small: album.cover_small
+          },
+          duration: firstTrack.duration
+        };
+        window.musicPlayer.play(firstTrack.preview, trackInfo);
+
+        const icon = this.querySelector('i');
+        if (icon && icon.classList.contains('bi-play-fill')) {
+          icon.classList.remove('bi-play-fill');
+          icon.classList.add('bi-pause-fill');
+        }
+        
+        if (window.musicPlayer) {
+          const audioPlayer = document.querySelector('audio');
+          if (audioPlayer) {
+            audioPlayer.addEventListener('ended', function() {
+              window.musicPlayer.playNext();
+            });
+          }
+        }
+      }
+    });
   }
+
+  document.querySelectorAll('.track-list-row').forEach((row, index) => {
+    row.addEventListener('click', function() {
+      const trackId = this.dataset.trackId;
+      const previewUrl = this.dataset.previewUrl;
+      if (previewUrl && window.musicPlayer) {
+        const playlist = album.tracks.data.map(track => {
+          return {
+            title: track.title,
+            preview: track.preview,
+            artist: {
+              name: track.artist.name,
+              id: track.artist.id
+            },
+            album: {
+              cover_small: album.cover_small
+            },
+            duration: track.duration
+          };
+        });
+        
+        window.musicPlayer.setPlaylist(playlist);
+        
+        const track = album.tracks.data[index];
+        const trackInfo = {
+          title: track.title,
+          artist: {
+            name: track.artist.name,
+            id: track.artist.id
+          },
+          album: {
+            cover_small: album.cover_small
+          },
+          duration: track.duration
+        };
+        window.musicPlayer.play(previewUrl, trackInfo);
+      }
+    });
+
+    row.style.cursor = 'pointer';
+  });
 }
 
 // ===================================================
