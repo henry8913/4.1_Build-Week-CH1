@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img src="https://readme-typing-svg.herokuapp.com/?font=Iosevka&size=24&color=1DB954&center=true&vCenter=true&width=1200&height=60&lines=🎵+Spotify+Clone+|+La+tua+musica%2C+ovunque+tu+sia+🎧" alt="🎵 Spotify Clone | La tua musica, ovunque tu sia 🎧">
+    <img src="https://readme-typing-svg.herokuapp.com/?font=Iosevka&size=24&color=1DB954&center=true&vCenter=true&width=1200&height=60&lines=🎵+Spotify+Clone+|+La+tua+musica%2C+ovunque+tu+sia+🎧&loop=false" alt="🎵 Spotify Clone | La tua musica, ovunque tu sia 🎧">
 </h1>
 
 Un'elegante replica dell'interfaccia di Spotify che permette di cercare artisti, visualizzare album e riprodurre anteprime di brani utilizzando l'API di Deezer.
