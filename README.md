@@ -53,6 +53,12 @@ python3 -m http.server 8000
 
 Poi apri [http://localhost:8000](http://localhost:8000) nel browser. In alternativa puoi usare l'estensione Live Server di VS Code.
 
+Per eseguire i controlli di base (link, id duplicati e sintassi JavaScript):
+
+```bash
+npm run check
+```
+
 ## 🖥️ Utilizzo
 
 - **Home**: album in evidenza, ascolti recenti, selezione di album e brani in tendenza
@@ -84,6 +90,10 @@ Poi apri [http://localhost:8000](http://localhost:8000) nel browser. In alternat
 │   ├── artist.js       # Pagina artista
 │   └── search.js       # Pagina di ricerca
 ├── img/                # Immagini e risorse
+├── scripts/
+│   └── check.js        # Controlli di link, id e sintassi
+├── .github/workflows/
+│   └── ci.yml          # CI che esegue i controlli
 ├── index.html          # Homepage
 ├── album.html          # Pagina album
 ├── artist.html         # Pagina artista
@@ -102,7 +112,7 @@ Poi apri [http://localhost:8000](http://localhost:8000) nel browser. In alternat
 
 - L'API è raggiunta tramite un proxy non ufficiale (`striveschool-api.herokuapp.com`), senza SLA: se il servizio non risponde, le sezioni mostrano un errore.
 - Le playlist personali, la libreria e il profilo utente sono ancora segnaposto.
-- Non sono presenti test automatici né pipeline CI.
+- I controlli automatici coprono link, id duplicati e sintassi JavaScript, ma non sono test end-to-end.
 
 ## 🤝 Contributi
 
