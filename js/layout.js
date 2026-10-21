@@ -18,21 +18,21 @@
       status: 'In ascolto - Your Autumn',
       extra: 'LESSERAFIM',
       time: '4 ore',
-      avatar: 'https://images.pexels.com/photos/1987301/pexels-photo-1987301.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&dpr=2'
+      avatar: 'img/friends/charlie.jpg'
     },
     {
       name: 'Juliet Huffaker',
       status: 'Ascolto da Kil Julio LaRive',
       extra: 'Asleep by Kil',
       time: '8 min',
-      avatar: 'https://images.pexels.com/photos/388517/pexels-photo-388517.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&dpr=2'
+      avatar: 'img/friends/juliet.jpg'
     },
     {
       name: 'Victoria Traverso',
       status: 'Now Rings - Dripping Wolf',
       extra: 'Town Bazaars (remix)',
       time: '3 giorni',
-      avatar: 'https://images.pexels.com/photos/821414/pexels-photo-821414.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&dpr=2'
+      avatar: 'img/friends/victoria.jpg'
     }
   ];
 

@@ -119,7 +119,7 @@ Il player, le pagine e la libreria non vanno modificati: usano solo `streamUrl`.
 │   ├── liked.js         # Brani che ti piacciono
 │   ├── library-page.js  # La tua libreria
 │   └── playlist.js      # Playlist personali
-├── img/                 # Immagini e risorse
+├── img/                 # Copertine, immagini categorie e avatar
 ├── scripts/check.js     # Controlli di link, id e sintassi
 ├── .github/workflows/   # CI dei controlli
 ├── index.html           # Homepage

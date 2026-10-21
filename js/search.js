@@ -16,49 +16,49 @@
       name: 'Podcast',
       query: 'podcast',
       cssClass: 'podcast',
-      image: 'https://i.pinimg.com/736x/de/6d/9d/de6d9d40ad5f4ca6b519fd29000775c6.jpg'
+      image: 'img/categories/podcast.jpg'
     },
     {
       name: 'Create per te',
       query: 'new music',
       cssClass: 'create',
-      image: 'https://i.pinimg.com/736x/c1/90/3b/c1903b54b02b86b0062fdd247c0e1ed6.jpg'
+      image: 'img/categories/create.jpg'
     },
     {
       name: 'Nuove uscite',
       query: 'new releases',
       cssClass: 'nuove-uscite',
-      image: 'https://i.pinimg.com/736x/ae/18/d6/ae18d636caad14a8824fdc93622cfedf.jpg'
+      image: 'img/categories/nuove-uscite.jpg'
     },
     {
       name: 'Pop',
       query: 'pop',
       cssClass: 'pop',
-      image: 'https://i.pinimg.com/736x/56/14/68/561468b31eed008ad5c03bd776dc3380.jpg'
+      image: 'img/categories/pop.jpg'
     },
     {
       name: 'Hip Hop',
       query: 'hip hop',
       cssClass: 'hip-hop',
-      image: 'https://i.pinimg.com/736x/2d/26/c2/2d26c2d50ae2b4eaeaadc7706896ebe4.jpg'
+      image: 'img/categories/hip-hop.jpg'
     },
     {
       name: 'Dance/ Elettronica',
       query: 'dance',
       cssClass: 'dance',
-      image: 'https://i.pinimg.com/736x/57/1a/84/571a840678559f8159d8508a390d34b7.jpg'
+      image: 'img/categories/dance.jpg'
     },
     {
       name: 'Latina',
       query: 'latin',
       cssClass: 'latina',
-      image: 'https://i.pinimg.com/736x/f0/9e/41/f09e4125c0f9f86bf47d1db81dd75caa.jpg'
+      image: 'img/categories/latina.jpg'
     },
     {
       name: 'Classifiche',
       query: 'top hits',
       cssClass: 'classifiche',
-      image: 'https://i.pinimg.com/736x/54/38/03/543803e5d6c93e60bc9449a4955b47f0.jpg'
+      image: 'img/categories/classifiche.jpg'
     }
   ];
 

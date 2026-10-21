@@ -109,10 +109,22 @@ function checkJavaScript() {
     return file.endsWith('.js');
   }).forEach(function (file) {
     const jsPath = path.join(jsDir, file);
+    const source = fs.readFileSync(jsPath, 'utf8');
+
     try {
       execFileSync(process.execPath, ['--check', jsPath], { stdio: 'pipe' });
     } catch (error) {
       errors.push('js/' + file + ': errore di sintassi');
+    }
+
+    // Verifica i percorsi locali a immagini citati nel JavaScript.
+    const imagePattern = /['"](img\/[^'"]+)['"]/g;
+    let match;
+    while ((match = imagePattern.exec(source)) !== null) {
+      const reference = match[1];
+      if (!fs.existsSync(path.join(ROOT, reference))) {
+        errors.push('js/' + file + ': immagine mancante -> ' + reference);
+      }
     }
   });
 }
