@@ -10,53 +10,56 @@ Un'elegante replica dell'interfaccia di Spotify che permette di cercare artisti,
 
 ## 📋 Descrizione
 
-Questo progetto è un clone di Spotify che replica l'esperienza utente dell'app originale. Sviluppato con tecnologie web moderne, offre un'interfaccia reattiva e user-friendly che funziona su tutti i dispositivi. Utilizza l'API di Deezer per accedere a un vasto catalogo musicale.
+Questo progetto è un clone di Spotify che replica l'esperienza utente dell'app originale. È interamente client-side, senza framework applicativi né build step: HTML, CSS e JavaScript vanilla con Bootstrap per il layout. I dati arrivano dall'API di Deezer tramite il proxy didattico di Strive School.
 
 ## 🚀 Tecnologie Utilizzate
 
-- **HTML5**: Struttura semantica del documento web
-- **CSS3**: Stile e layout responsivo
-- **JavaScript (ES6+)**: Logica di interazione e chiamate API
-- **Bootstrap 5**: Framework CSS per un'interfaccia moderna e responsive
-- **Fetch API**: Per effettuare richieste asincrone all'API di Deezer
-- **Deezer API**: Fornitura di dati musicali (artisti, album, brani)
-- **Bootstrap Icons**: Set di icone per migliorare l'interfaccia utente
-- **Media Queries**: Adattamento dell'interfaccia a diverse dimensioni di schermo
+- **HTML5**: struttura semantica delle pagine
+- **CSS3**: stile, layout a griglia e media query
+- **JavaScript (ES6+)**: logica di interazione, chiamate API e player audio
+- **Bootstrap 5**: griglia, componenti e utilità responsive
+- **Bootstrap Icons**: set di icone
+- **Fetch API + AbortController**: richieste asincrone con timeout
+- **localStorage**: persistenza di like, album salvati, artisti seguiti, volume, shuffle e repeat
+- **Media Session API**: controlli multimediali da lock screen e tasti del dispositivo
 
 ## ⚙️ Caratteristiche
 
-- Ricerca di artisti, album e brani tramite integrazione con API Deezer
-- Riproduzione di anteprime audio con controlli del player
-- Visualizzazione dettagliata di artisti con biografia e brani popolari
-- Esplorazione di album con tracklist completa
-- Player musicale completo con controlli di riproduzione
-- Mini-player mobile per un'esperienza ottimizzata su smartphone
-- Funzionalità di passaggio automatico alla traccia successiva
-- Layout completamente responsive per tutti i dispositivi
-- Navigazione tramite sidebar con playlist suggerite
+- Ricerca di album, artisti e generi con debounce, sia su desktop sia su mobile
+- Riproduzione di anteprime audio con player condiviso tra tutte le pagine
+- Play/pausa, brano successivo e precedente, seek sulla barra di avanzamento
+- Shuffle e repeat (off / playlist / singolo brano) realmente funzionanti
+- Controllo del volume con mute e memoria dell'ultimo livello
+- Like dei brani e salvataggio di album e artisti, persistiti nel browser
+- Pagina artista con brani più ascoltati e discografia
+- Pagina album con tracklist completa, durata totale e copyright
+- Mini player e navigazione inferiore su mobile, con sidebar a scomparsa
+- Salto automatico al brano successivo e gestione dei brani senza anteprima
+- Layout responsive con breakpoint a 1200, 992, 768 e 576 px
+- Messaggi di errore e stati di caricamento espliciti
 
 ## 🛠️ Installazione
 
 ```bash
 # Clona il repository
-git clone https://github.com/tuousername/spotify-clone.git
+git clone https://github.com/henry8913/4.1_Build-Week-CH1.git
 
-# Naviga nella directory del progetto
-cd spotify-clone
+# Entra nella cartella
+cd 4.1_Build-Week-CH1
 
-# Apri il file index.html nel tuo browser
-# Oppure utilizza un server locale come Live Server
+# Avvia un server locale (consigliato: il progetto usa fetch)
+python3 -m http.server 8000
 ```
+
+Poi apri [http://localhost:8000](http://localhost:8000) nel browser. In alternativa puoi usare l'estensione Live Server di VS Code.
 
 ## 🖥️ Utilizzo
 
-Il progetto è completamente client-side e può essere utilizzato aprendo il file `index.html` in un browser. Le principali funzionalità includono:
-
-- **Home**: Visualizza album in evidenza e contenuti suggeriti
-- **Pagina Artista**: Esplora biografia, brani popolari e album di un artista
-- **Pagina Album**: Visualizza tutti i brani contenuti in un album specifico
-- **Ricerca**: Cerca artisti e brani utilizzando la barra di ricerca
-- **Player**: Controlla la riproduzione dei brani con il player integrato
+- **Home**: album in evidenza, ascolti recenti, selezione di album e brani in tendenza
+- **Pagina Artista**: brani popolari e discografia, con pulsante "Segui"
+- **Pagina Album**: tracklist, pulsante Play e salvataggio dell'album
+- **Cerca**: ricerca libera, categorie sfogliabili e risultati riproducibili
+- **Player**: barra fissa su desktop, mini player su mobile
 
 ## 📸 Screenshot
 
@@ -65,25 +68,41 @@ Il progetto è completamente client-side e può essere utilizzato aprendo il fil
 ## 💻 Struttura del Progetto
 
 ```
-spotify-clone/
-├── css/                # Fogli di stile
-│   ├── style.css       # Stili globali
-│   ├── player.css      # Stili del player
-│   ├── album.css       # Stili pagina album
-│   ├── artist.css      # Stili pagina artista
-│   └── search-mobile.css  # Stili mobile per ricerca
-├── js/                 # Script JavaScript
-│   ├── script.js       # Script principale
-│   ├── player.js       # Logica del player
-│   ├── album.js        # Gestione pagina album
-│   ├── artist.js       # Gestione pagina artista
-│   └── search.js       # Funzionalità di ricerca
+4.1_Build-Week-CH1/
+├── css/
+│   ├── style.css       # Stili globali, layout e responsive
+│   ├── player.css      # Player desktop e mini player mobile
+│   ├── album.css       # Pagina album
+│   ├── artist.css      # Pagina artista
+│   └── search.css      # Pagina di ricerca
+├── js/
+│   ├── utils.js        # Utility condivise (escaping, API, storage)
+│   ├── layout.js       # Sidebar, header, colonna amici e player
+│   ├── player.js       # Motore audio e controlli
+│   ├── script.js       # Home
+│   ├── album.js        # Pagina album
+│   ├── artist.js       # Pagina artista
+│   └── search.js       # Pagina di ricerca
 ├── img/                # Immagini e risorse
 ├── index.html          # Homepage
 ├── album.html          # Pagina album
 ├── artist.html         # Pagina artista
-└── search.html         # Pagina di ricerca
+├── search.html         # Pagina di ricerca
+└── README.md
 ```
+
+### Note tecniche
+
+- `js/layout.js` inietta sidebar, header, colonna amici e player bar in tutte le pagine, così il markup condiviso esiste in un solo posto.
+- `js/utils.js` centralizza escaping HTML, chiamate API, formattazione e persistenza.
+- Tutti i dati provenienti dall'API e le query utente vengono escapati prima di essere inseriti nel DOM.
+- L'anteprima audio fornita da Deezer dura circa 30 secondi: è una limitazione del servizio, non del player.
+
+### Limiti noti
+
+- L'API è raggiunta tramite un proxy non ufficiale (`striveschool-api.herokuapp.com`), senza SLA: se il servizio non risponde, le sezioni mostrano un errore.
+- Le playlist personali, la libreria e il profilo utente sono ancora segnaposto.
+- Non sono presenti test automatici né pipeline CI.
 
 ## 🤝 Contributi
 
