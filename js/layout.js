@@ -210,9 +210,7 @@
                 '<button type="button" class="btn btn-link text-white volume-btn" aria-label="Disattiva audio">' +
                   '<i class="bi bi-volume-up-fill"></i>' +
                 '</button>' +
-                '<div class="progress volume-container mx-2" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70">' +
-                  '<div class="progress-bar" role="progressbar" style="width: 70%"></div>' +
-                '</div>' +
+                '<input type="range" class="volume-slider" id="volume-slider" min="0" max="100" step="1" value="70" aria-label="Volume">' +
               '</div>' +
             '</div>' +
           '</div>' +

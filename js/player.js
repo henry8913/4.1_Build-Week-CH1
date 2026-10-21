@@ -190,8 +190,7 @@
       progressBar: document.querySelector('.progress-container .progress-bar'),
 
       volumeBtn: document.querySelector('.volume-btn'),
-      volumeContainer: document.querySelector('.volume-container'),
-      volumeBar: document.querySelector('.volume-container .progress-bar'),
+      volumeSlider: document.getElementById('volume-slider'),
 
       mobileCover: document.querySelector('.mobile-album-img'),
       mobileTrackName: document.querySelector('.mobile-track-name'),
@@ -342,8 +341,11 @@
 
   function updateVolumeUI() {
     const percentage = Math.round(volume * 100);
-    if (els.volumeBar) els.volumeBar.style.width = percentage + '%';
-    if (els.volumeContainer) els.volumeContainer.setAttribute('aria-valuenow', String(percentage));
+
+    if (els.volumeSlider) {
+      els.volumeSlider.value = String(percentage);
+      els.volumeSlider.style.setProperty('--volume', percentage + '%');
+    }
 
     if (els.volumeBtn) {
       const icon = els.volumeBtn.querySelector('i');
@@ -744,8 +746,48 @@
   function bindProgress(element) {
     if (!element) return;
 
-    element.addEventListener('click', function (event) {
+    let dragging = false;
+
+    function apply(event) {
       seekToRatio(ratioFromEvent(element, event));
+    }
+
+    element.addEventListener('pointerdown', function (event) {
+      if (event.button !== undefined && event.button !== 0) return;
+
+      dragging = true;
+      element.classList.add('is-dragging');
+      if (element.focus) element.focus();
+
+      if (element.setPointerCapture) {
+        try { element.setPointerCapture(event.pointerId); } catch (error) {}
+      }
+
+      apply(event);
+      event.preventDefault();
+    });
+
+    element.addEventListener('pointermove', function (event) {
+      if (!dragging) return;
+      apply(event);
+      event.preventDefault();
+    });
+
+    function stop(event) {
+      if (!dragging) return;
+      dragging = false;
+      element.classList.remove('is-dragging');
+
+      if (element.releasePointerCapture && event.pointerId !== undefined) {
+        try { element.releasePointerCapture(event.pointerId); } catch (error) {}
+      }
+    }
+
+    element.addEventListener('pointerup', stop);
+    element.addEventListener('pointercancel', stop);
+    element.addEventListener('lostpointercapture', function () {
+      dragging = false;
+      element.classList.remove('is-dragging');
     });
 
     element.addEventListener('keydown', function (event) {
@@ -759,21 +801,23 @@
     });
   }
 
-  function bindVolume(element) {
-    if (!element) return;
+  function bindVolumeSlider(slider) {
+    if (!slider) return;
 
-    element.addEventListener('click', function (event) {
-      setVolume(ratioFromEvent(element, event));
+    slider.addEventListener('input', function () {
+      setVolume(Number(slider.value) / 100);
     });
 
-    element.addEventListener('keydown', function (event) {
-      if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
-        event.preventDefault();
-        setVolume(volume + 0.05);
-      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
-        event.preventDefault();
-        setVolume(volume - 0.05);
-      }
+    slider.addEventListener('pointerdown', function () {
+      slider.classList.add('is-dragging');
+    });
+
+    slider.addEventListener('pointerup', function () {
+      slider.classList.remove('is-dragging');
+    });
+
+    slider.addEventListener('blur', function () {
+      slider.classList.remove('is-dragging');
     });
   }
 
@@ -795,7 +839,7 @@
 
     bindProgress(els.progress);
     bindProgress(els.mobileProgress);
-    bindVolume(els.volumeContainer);
+    bindVolumeSlider(els.volumeSlider);
 
     document.addEventListener('keydown', function (event) {
       if (event.code !== 'Space') return;

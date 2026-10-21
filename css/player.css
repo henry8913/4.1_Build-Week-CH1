@@ -146,12 +146,24 @@
 }
 
 .progress {
+  position: relative;
   height: 4px;
   border-radius: 2px;
   background-color: #4d4d4d;
   cursor: pointer;
-  overflow: hidden;
+  overflow: visible;
+  touch-action: none;
   transition: height 0.15s ease;
+}
+
+/* Area cliccabile piu' alta del filo visibile. */
+.progress::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -8px;
+  bottom: -8px;
 }
 
 .progress:hover {
@@ -159,10 +171,12 @@
 }
 
 .progress-bar {
+  border-radius: 2px;
   background-color: #fff;
   transition: background-color 0.15s ease;
 }
 
+.progress.is-dragging .progress-bar,
 .progress:hover .progress-bar {
   background-color: var(--spotify-green);
 }
@@ -194,9 +208,84 @@
   color: #fff;
 }
 
-.volume-container {
+.volume-slider {
+  --volume: 70%;
+  -webkit-appearance: none;
+  appearance: none;
   width: 100px;
+  height: 18px;
+  margin: 0 8px;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
   flex: 0 0 auto;
+  touch-action: none;
+}
+
+/* Chrome / Safari / Edge */
+.volume-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    #fff 0%,
+    #fff var(--volume),
+    #4d4d4d var(--volume),
+    #4d4d4d 100%
+  );
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border: 0;
+  border-radius: 50%;
+  background-color: #fff;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  cursor: pointer;
+}
+
+.volume-slider:hover::-webkit-slider-thumb,
+.volume-slider:focus-visible::-webkit-slider-thumb,
+.volume-slider.is-dragging::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+/* Firefox */
+.volume-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background-color: #4d4d4d;
+}
+
+.volume-slider::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background-color: #fff;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background-color: #fff;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  cursor: pointer;
+}
+
+.volume-slider:hover::-moz-range-thumb,
+.volume-slider:focus-visible::-moz-range-thumb,
+.volume-slider.is-dragging::-moz-range-thumb {
+  opacity: 1;
+}
+
+.volume-slider:focus-visible {
+  outline: none;
 }
 
 /* ---------------------------------------------------
@@ -209,10 +298,21 @@
 }
 
 .mobile-progress {
+  position: relative;
   height: 3px;
   width: 100%;
   background-color: #3a3a3a;
   cursor: pointer;
+  touch-action: none;
+}
+
+.mobile-progress::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -10px;
+  bottom: -6px;
 }
 
 .mobile-progress-bar {
