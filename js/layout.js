@@ -109,7 +109,7 @@
 
         '<div class="header-right">' +
           '<div class="user-profile-container" role="button" tabindex="0" data-soon="Il profilo utente arriverà presto">' +
-            '<span class="user-avatar user-initials" aria-hidden="true">LN</span>' +
+            '<img src="img/friends/lidia.jpg" alt="" class="user-avatar">' +
             '<span class="user-name">Lidia Nautilus</span>' +
             '<i class="bi bi-caret-down-fill"></i>' +
           '</div>' +

@@ -167,17 +167,6 @@ img {
   flex: 0 0 auto;
 }
 
-.user-initials {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--spotify-green), #0f7a37);
-  color: #08210f;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.4px;
-}
-
 .user-name {
   font-size: 14px;
   font-weight: 600;
