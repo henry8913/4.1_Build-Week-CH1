@@ -1,709 +1,440 @@
-
 // ===================================================
-// INITIALIZATION AND EVENT LISTENERS
+// HOME
 // ===================================================
-document.addEventListener('DOMContentLoaded', function() {
-  fetchFeaturedAlbum();
-  fetchRecentlyPlayed();
-  fetchAlbums('rock');
-  fetchTrendingMusic();
-  fetchPlayerBarTrack(); 
+// Carica album in evidenza, ascolti recenti, una
+// selezione di album e i brani in tendenza.
+// ===================================================
 
-  setupSearch();
-  
-  if (window.musicPlayer) {
-    const audioPlayer = document.querySelector('audio');
-    if (audioPlayer) {
-      audioPlayer.addEventListener('ended', function() {
-        window.musicPlayer.playNext();
-      });
-    }
+(function () {
+  'use strict';
+
+  const U = window.AppUtils;
+
+  const RECENT_ARTISTS = ['Eminem', 'Taylor Swift', 'Ed Sheeran', 'Billie Eilish', 'Coldplay', 'Daft Punk', 'Bruno Mars', 'Lady Gaga', 'Drake', 'Dua Lipa', 'The Weeknd', 'Rihanna', 'Post Malone', 'Ariana Grande', 'Harry Styles', 'Travis Scott', 'Paramore', 'J. Cole', 'Salmo', 'Fedez'];
+
+  const FEATURED_ARTISTS = ['Fedez', 'Salmo', 'Dua Lipa', 'The Weeknd', 'Adele', 'Drake', 'Bruno Mars', 'Lady Gaga', 'Billie Eilish', 'Post Malone', 'Ed Sheeran', 'Sia', 'Shawn Mendes', 'Khalid', 'Taylor Swift', 'Maroon 5', 'Imagine Dragons', 'Ariana Grande', 'Sam Smith', 'Miley Cyrus', 'Rihanna', 'Harry Styles', 'Pink', 'The Killers', 'Paramore'];
+
+  const TRENDING_GENRES = ['pop', 'rap', 'electronic', 'indie', 'metal', 'rock', 'jazz', 'blues', 'reggae', 'country', 'hip-hop', 'alternative', 'folk', 'punk', 'soul', 'disco', 'latin', 'synthwave'];
+
+  // ---------------------------------------------------
+  // UTILITA'
+  // ---------------------------------------------------
+
+  function randomItem(list) {
+    return list[Math.floor(Math.random() * list.length)];
   }
 
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.play-hover')) {
-      e.preventDefault();
-      const albumElement = e.target.closest('.album-card');
-      if (albumElement && albumElement.dataset.albumId) {
-        if (albumElement.dataset.previewUrl && window.musicPlayer) {
-          const trackInfo = {
-            title: albumElement.querySelector('.card-title').textContent,
-            artist: {
-              name: albumElement.querySelector('.card-text a').textContent,
-              id: albumElement.querySelector('.card-text a').href.split('=')[1]
-            },
-            album: {
-              cover_small: albumElement.querySelector('.card-img-top').src
-            },
-            preview: albumElement.dataset.previewUrl,
-            duration: 30
-          };
-          
-          const parentSection = albumElement.closest('#album-list, #trending-container');
-          
-          if (parentSection) {
-            const playlist = [];
-            parentSection.querySelectorAll('.album-card').forEach(card => {
-              if (card.dataset.previewUrl) {
-                playlist.push({
-                  title: card.querySelector('.card-title').textContent,
-                  artist: {
-                    name: card.querySelector('.card-text a').textContent,
-                    id: card.querySelector('.card-text a').href.split('=')[1]
-                  },
-                  album: {
-                    cover_small: card.querySelector('.card-img-top').src
-                  },
-                  preview: card.dataset.previewUrl,
-                  duration: 30
-                });
-              }
-            });
-            
-            window.musicPlayer.setPlaylist(playlist);
-            
-            const currentIndex = playlist.findIndex(track => track.preview === albumElement.dataset.previewUrl);
-            if (currentIndex !== -1) {
-              currentTrackIndex = currentIndex;
-            }
-          } else {
-            window.musicPlayer.setPlaylist([trackInfo]);
-          }
-          
-          window.musicPlayer.play(albumElement.dataset.previewUrl, trackInfo);
-          return;
-        } else {
-          loadAlbumDetails(albumElement.dataset.albumId);
-        }
-      }
-    }
-    
-    if (e.target.closest('.play-btn') && window.musicPlayer) {
-      const playButton = e.target.closest('.play-btn');
-      if (window.musicPlayer.getCurrentTrack()) {
-        if (window.musicPlayer.isPlaying()) {
-          window.musicPlayer.pause();
-        } else {
-          window.musicPlayer.play(window.musicPlayer.getCurrentTrack());
-        }
-      }
-    }
+  function uniqueByAlbum(items) {
+    const seen = new Set();
+    return items.filter(function (item) {
+      if (!item || !item.album || !item.album.id) return false;
+      const key = String(item.album.id);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
 
-    if (e.target.closest('#featured-album .btn-success')) {
-      e.preventDefault();
-      const featuredAlbum = document.getElementById('featured-album');
-      if (featuredAlbum && featuredAlbum.dataset.previewUrl && window.musicPlayer) {
-        const trackInfo = {
-          title: document.getElementById('featured-album-title').textContent,
-          artist: {
-            name: document.getElementById('featured-album-artist').textContent.trim(),
-            id: featuredAlbum.dataset.artistId || ''
-          },
-          album: {
-            cover_small: document.getElementById('featured-album-img').src
-          },
-          preview: featuredAlbum.dataset.previewUrl
-        };
-        
-        const playlist = [trackInfo];
-        window.musicPlayer.setPlaylist(playlist);
-        window.musicPlayer.play(featuredAlbum.dataset.previewUrl, trackInfo);
-      }
-    }
+  function uniqueRecent(items) {
+    const seen = new Set();
+    return uniqueByAlbum(items).filter(function (item) {
+      const key = (item.album.title || '') + '|' + (item.artist.name || '');
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
 
-    if (e.target.closest('.recent-card')) {
-      e.preventDefault();
-      const recentCard = e.target.closest('.recent-card');
-      if (recentCard && recentCard.dataset.albumId) {
-        if (recentCard.dataset.previewUrl && window.musicPlayer) {
-          const trackInfo = {
-            title: recentCard.querySelector('.fw-bold').textContent,
-            artist: {
-              name: recentCard.querySelector('.text-white-50').textContent,
-              id: ''
-            },
-            album: {
-              cover_small: recentCard.querySelector('.recent-album-img').src
-            },
-            preview: recentCard.dataset.previewUrl
-          };
-          
-          const playlist = [];
-          document.querySelectorAll('.recent-card').forEach(card => {
-            if (card.dataset.previewUrl) {
-              playlist.push({
-                title: card.querySelector('.fw-bold').textContent,
-                artist: {
-                  name: card.querySelector('.text-white-50').textContent,
-                  id: ''
-                },
-                album: {
-                  cover_small: card.querySelector('.recent-album-img').src
-                },
-                preview: card.dataset.previewUrl,
-                duration: 30
-              });
-            }
-          });
-          
-          window.musicPlayer.setPlaylist(playlist);
-          
-          const currentIndex = playlist.findIndex(track => track.preview === recentCard.dataset.previewUrl);
-          if (currentIndex !== -1) {
-            currentTrackIndex = currentIndex;
-          }
-          
-          window.musicPlayer.play(recentCard.dataset.previewUrl, trackInfo);
+  function cardMarkup(item, sizeClass) {
+    const album = item.album;
+    const artist = item.artist;
+    const title = album.title || 'Album senza titolo';
+    const artistName = artist.name || 'Artista sconosciuto';
+    const cover = album.cover_medium || album.cover_small || 'img/cover_c.jpg';
+    const albumUrl = U.pageUrl('album.html', { id: album.id });
+
+    return (
+      '<div class="' + sizeClass + '">' +
+        '<div class="card album-card" role="link" tabindex="0"' +
+          ' data-album-id="' + U.escapeHtml(album.id) + '"' +
+          ' data-track-id="' + U.escapeHtml(item.id !== undefined && item.id !== null ? item.id : '') + '"' +
+          ' data-album-title="' + U.escapeHtml(title) + '"' +
+          ' data-artist-id="' + U.escapeHtml(artist.id) + '"' +
+          ' data-artist-name="' + U.escapeHtml(artistName) + '"' +
+          ' data-title="' + U.escapeHtml(item.title || title) + '"' +
+          ' data-cover="' + U.escapeHtml(cover) + '"' +
+          ' data-preview-url="' + U.escapeHtml(item.preview || '') + '"' +
+          ' data-album-url="' + U.escapeHtml(albumUrl) + '">' +
+          '<img src="' + U.escapeHtml(cover) + '" class="card-img-top" alt="' + U.escapeHtml(title) + '" loading="lazy">' +
+          '<span class="play-hover" role="button" tabindex="-1" aria-label="Riproduci ' + U.escapeHtml(item.title || title) + '">' +
+            '<i class="bi bi-play-fill"></i>' +
+          '</span>' +
+          '<div class="card-body p-2">' +
+            '<h3 class="card-title text-truncate">' + U.escapeHtml(title) + '</h3>' +
+            '<p class="card-text text-truncate">' +
+              '<a href="' + U.escapeHtml(U.pageUrl('artist.html', { id: artist.id })) + '" class="text-light text-decoration-none">' +
+                U.escapeHtml(artistName) +
+              '</a>' +
+            '</p>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  // ---------------------------------------------------
+  // RICHIESTE
+  // ---------------------------------------------------
+
+  function loadFeaturedAlbum() {
+    const container = document.getElementById('featured-album');
+    if (!container) return;
+
+    U.api.search(randomItem(FEATURED_ARTISTS), 1)
+      .then(function (items) {
+        if (!items.length) throw new Error('Nessun album in evidenza disponibile');
+        renderFeaturedAlbum(items[0]);
+      })
+      .catch(function (error) {
+        console.error('Errore album in evidenza:', error);
+        U.showError(container, 'Errore nel caricamento: ' + error.message);
+      });
+  }
+
+  function loadRecentlyPlayed() {
+    const container = document.getElementById('recent-container');
+    if (!container) return;
+
+    U.showSpinner(container);
+
+    U.api.search(randomItem(RECENT_ARTISTS), 6)
+      .then(function (items) {
+        renderRecentlyPlayed(container, uniqueRecent(items).slice(0, 6));
+      })
+      .catch(function (error) {
+        console.error('Errore ascolti recenti:', error);
+        U.showError(container, 'Errore nel caricamento: ' + error.message);
+      });
+  }
+
+  function loadAlbumList() {
+    const container = document.getElementById('album-list');
+    if (!container) return;
+
+    U.showSpinner(container);
+
+    U.api.search('rock')
+      .then(function (items) {
+        const albums = uniqueByAlbum(items).slice(0, 12);
+        if (!albums.length) {
+          container.innerHTML = '<div class="col-12 empty-state">Nessun album disponibile al momento.</div>';
           return;
         }
-        loadAlbumDetails(recentCard.dataset.albumId);
-      }
-    }
-  });
-});
-
-// ===================================================
-// SEARCH FUNCTIONALITY
-// ===================================================
-
-function setupSearch() {
-  const searchLink = document.getElementById('search-link');
-  const searchBox = document.getElementById('search-box');
-  const searchInput = document.getElementById('search-input');
-
-  const mobileSearchLink = document.getElementById('mobile-search-link');
-  const mobileSearchBox = document.getElementById('mobile-search-box');
-  const mobileSearchInput = document.getElementById('mobile-search-input');
-  const mobileSearchButton = document.getElementById('mobile-search-button');
-
-  if (searchLink && searchBox && searchInput) {
-    searchLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      if (searchBox.style.display === 'none' || searchBox.style.display === '') {
-        searchBox.style.display = 'block';
-        searchInput.focus();
-      } else {
-        searchBox.style.display = 'none';
-      }
-    });
-
-    searchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        performSearch(searchInput.value.trim());
-      }
-    });
-  }
-
-  if (mobileSearchLink && mobileSearchBox && mobileSearchInput && mobileSearchButton) {
-    if (window.innerWidth < 992) {
-      mobileSearchLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location.href = 'search.html';
+        container.innerHTML = albums.map(function (item) {
+          return cardMarkup(item, 'col-6 col-sm-4 col-md-3 col-lg-2');
+        }).join('');
+      })
+      .catch(function (error) {
+        console.error('Errore lista album:', error);
+        U.showError(container, 'Errore nel caricamento: ' + error.message);
       });
-    } else {
-      mobileSearchLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (mobileSearchBox.style.display === 'none' || mobileSearchBox.style.display === '') {
-          mobileSearchBox.style.display = 'block';
-          mobileSearchInput.focus();
-        } else {
-          mobileSearchBox.style.display = 'none';
+  }
+
+  function loadTrending() {
+    const container = document.getElementById('trending-container');
+    if (!container) return;
+
+    U.showSpinner(container);
+
+    U.api.search(randomItem(TRENDING_GENRES), 5)
+      .then(function (items) {
+        const albums = uniqueByAlbum(items).slice(0, 5);
+        if (!albums.length) {
+          container.innerHTML = '<div class="col-12 empty-state">Nessun brano in tendenza al momento.</div>';
+          return;
         }
+        container.innerHTML = albums.map(function (item) {
+          return cardMarkup(item, 'col-6 col-sm-4 col-md-3 col-lg-2');
+        }).join('');
+      })
+      .catch(function (error) {
+        console.error('Errore brani in tendenza:', error);
+        U.showError(container, 'Errore nel caricamento: ' + error.message);
       });
+  }
+
+  // ---------------------------------------------------
+  // RENDER
+  // ---------------------------------------------------
+
+  function renderRecentlyPlayed(container, items) {
+    if (!items.length) {
+      container.innerHTML = '<div class="col-12 empty-state">Nessun ascolto recente disponibile.</div>';
+      return;
     }
 
-    mobileSearchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        const query = mobileSearchInput.value.trim();
-        if (query && window.innerWidth < 992) {
-          window.location.href = `search.html?search=${encodeURIComponent(query)}`;
-        } else {
-          performSearch(query);
+    container.innerHTML = items.map(function (item) {
+      const album = item.album;
+      const cover = album.cover_small || album.cover_medium || 'img/cover_c.jpg';
+
+      return (
+        '<div class="col-12 col-sm-6 col-lg-4">' +
+          '<div class="card recent-card" role="link" tabindex="0"' +
+            ' data-album-id="' + U.escapeHtml(album.id) + '"' +
+            ' data-track-id="' + U.escapeHtml(item.id !== undefined && item.id !== null ? item.id : '') + '"' +
+            ' data-album-title="' + U.escapeHtml(album.title || '') + '"' +
+            ' data-artist-id="' + U.escapeHtml(item.artist.id) + '"' +
+            ' data-artist-name="' + U.escapeHtml(item.artist.name) + '"' +
+            ' data-title="' + U.escapeHtml(item.title) + '"' +
+            ' data-cover="' + U.escapeHtml(cover) + '"' +
+            ' data-preview-url="' + U.escapeHtml(item.preview || '') + '"' +
+            ' data-album-url="' + U.escapeHtml(U.pageUrl('album.html', { id: album.id })) + '">' +
+            '<div class="card-body d-flex align-items-center">' +
+              '<img src="' + U.escapeHtml(cover) + '" class="recent-album-img" alt="" loading="lazy">' +
+              '<div class="ms-3 overflow-hidden recent-text">' +
+                '<span class="d-block text-truncate fw-bold">' + U.escapeHtml(item.title) + '</span>' +
+                '<span class="d-block text-truncate small text-white-50">' + U.escapeHtml(item.artist.name) + '</span>' +
+              '</div>' +
+              '<button type="button" class="btn btn-link text-white recent-play play-hover-static" aria-label="Riproduci ' + U.escapeHtml(item.title) + '">' +
+                '<i class="bi bi-play-fill"></i>' +
+              '</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function renderFeaturedAlbum(item) {
+    const container = document.getElementById('featured-album');
+    if (!container) return;
+
+    const album = item.album;
+    const artist = item.artist;
+    const cover = album.cover_big || album.cover_medium || 'img/cover_c.jpg';
+
+    container.dataset.albumId = album.id || '';
+    container.dataset.trackId = item.id !== undefined && item.id !== null ? item.id : '';
+    container.dataset.artistId = artist.id || '';
+    container.dataset.albumTitle = album.title || '';
+    container.dataset.artistName = artist.name || '';
+    container.dataset.title = item.title || album.title || '';
+    container.dataset.cover = cover;
+    container.dataset.previewUrl = item.preview || '';
+
+    const image = document.getElementById('featured-album-img');
+    if (image) {
+      image.src = cover;
+      image.alt = album.title || 'Copertina album';
+    }
+
+    const title = document.getElementById('featured-album-title');
+    if (title) title.textContent = item.title || album.title;
+
+    const artistElement = document.getElementById('featured-album-artist');
+    if (artistElement) {
+      artistElement.textContent = '';
+      const link = document.createElement('a');
+      link.href = U.pageUrl('artist.html', { id: artist.id });
+      link.className = 'text-light text-decoration-none';
+      link.textContent = artist.name;
+      artistElement.appendChild(link);
+    }
+
+    const description = document.getElementById('featured-album-description');
+    if (description) {
+      description.textContent = 'Ascolta il nuovo singolo di ' + artist.name + '!';
+    }
+
+    const background = document.querySelector('.featured-album-bg');
+    if (background) {
+      background.style.backgroundImage =
+        'linear-gradient(0deg, rgba(18, 18, 18, 1) 0%, rgba(18, 18, 18, 0.75) 55%, rgba(18, 18, 18, 0.35) 100%), url("' +
+        String(cover).replace(/"/g, '%22') + '")';
+    }
+
+    syncFeaturedSaveButton();
+  }
+
+  function featuredTrack() {
+    const container = document.getElementById('featured-album');
+    if (!container) return null;
+
+    return {
+      preview: container.dataset.previewUrl || '',
+      title: container.dataset.title || '',
+      id: container.dataset.trackId || '',
+      artist: { id: container.dataset.artistId || '', name: container.dataset.artistName || '' },
+      album: {
+        id: container.dataset.albumId || '',
+        title: container.dataset.albumTitle || '',
+        cover_small: container.dataset.cover || ''
+      },
+      duration: 30
+    };
+  }
+
+  function syncFeaturedSaveButton() {
+    const button = document.getElementById('featured-save');
+    const container = document.getElementById('featured-album');
+    if (!button || !container) return;
+
+    const saved = U.isInList(U.LISTS.savedAlbums, container.dataset.albumId);
+    const icon = button.querySelector('i');
+
+    button.classList.toggle('is-saved', saved);
+    button.setAttribute('aria-pressed', saved ? 'true' : 'false');
+
+    if (icon) {
+      icon.classList.toggle('bi-check-lg', saved);
+      icon.classList.toggle('bi-plus-lg', !saved);
+    }
+
+    button.title = saved ? 'Rimuovi dalla libreria' : 'Salva nella libreria';
+  }
+
+  // ---------------------------------------------------
+  // EVENTI
+  // ---------------------------------------------------
+
+  function cardTrack(card) {
+    return {
+      preview: card.dataset.previewUrl || '',
+      title: card.dataset.title || '',
+      id: card.dataset.trackId || '',
+      artist: { id: card.dataset.artistId || '', name: card.dataset.artistName || '' },
+      album: {
+        id: card.dataset.albumId || '',
+        title: card.dataset.albumTitle || '',
+        cover_small: card.dataset.cover || ''
+      },
+      duration: 30
+    };
+  }
+
+  function containerTracks(card) {
+    const container = card.closest('.track-container');
+    const cards = container
+      ? Array.prototype.slice.call(container.querySelectorAll('[data-preview-url]'))
+      : [card];
+
+    const playable = cards.filter(function (element) {
+      return element.dataset.previewUrl;
+    });
+
+    return {
+      tracks: playable.map(cardTrack),
+      index: playable.indexOf(card)
+    };
+  }
+
+  function playCard(card) {
+    if (!card || !card.dataset.previewUrl) {
+      if (card && card.dataset.albumUrl) window.location.href = card.dataset.albumUrl;
+      return;
+    }
+
+    const selection = containerTracks(card);
+    window.musicPlayer.playFrom(selection.tracks, selection.index === -1 ? 0 : selection.index);
+  }
+
+  function navigateCard(card) {
+    if (!card) return;
+    if (card.dataset.albumUrl) {
+      window.location.href = card.dataset.albumUrl;
+    }
+  }
+
+  function setGreeting() {
+    const element = document.getElementById('greeting');
+    if (!element) return;
+
+    const hour = new Date().getHours();
+    let greeting = 'Buonasera';
+    if (hour < 6) greeting = 'Buonanotte';
+    else if (hour < 12) greeting = 'Buongiorno';
+    else if (hour < 18) greeting = 'Buon pomeriggio';
+
+    element.textContent = greeting;
+  }
+
+  function bindEvents() {
+    document.addEventListener('click', function (event) {
+      // Play sulle card.
+      const recentPlay = event.target.closest('.recent-play');
+      if (recentPlay) {
+        event.preventDefault();
+        event.stopPropagation();
+        playCard(recentPlay.closest('.recent-card'));
+        return;
+      }
+
+      const hover = event.target.closest('.play-hover');
+      if (hover) {
+        event.preventDefault();
+        event.stopPropagation();
+        playCard(hover.closest('.album-card'));
+        return;
+      }
+
+      const featuredPlay = event.target.closest('#featured-play');
+      if (featuredPlay) {
+        event.preventDefault();
+        const track = featuredTrack();
+        if (track && track.preview) {
+          window.musicPlayer.playFrom([track], 0);
+        } else if (track && track.album.id) {
+          window.location.href = U.pageUrl('album.html', { id: track.album.id });
         }
+        return;
       }
-    });
 
-    mobileSearchButton.addEventListener('click', function() {
-      const query = mobileSearchInput.value.trim();
-      if (query && window.innerWidth < 992) {
-        window.location.href = `search.html?search=${encodeURIComponent(query)}`;
-      } else {
-        performSearch(query);
-      }
-    });
-  }
-
-  function performSearch(query) {
-    if (query) {
-      if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname === '') {
-        const contentArea = document.getElementById('content-area');
-        if (contentArea) {
-          let searchResultsHTML = `
-            <div class="row mb-4">
-              <div class="col-12">
-                <h2 class="text-white">Risultati per "${query}"</h2>
-              </div>
-            </div>
-            <div class="row" id="search-results">
-              
-            </div>
-          `;
-
-          contentArea.innerHTML = searchResultsHTML;
-
-          searchAlbumsInContent(query);
-
-          if (searchBox) searchBox.style.display = 'none';
-          if (mobileSearchBox) mobileSearchBox.style.display = 'none';
+      const featuredSave = event.target.closest('#featured-save');
+      if (featuredSave) {
+        event.preventDefault();
+        const container = document.getElementById('featured-album');
+        if (!container || !container.dataset.albumId) return;
+        const saved = U.toggleInList(U.LISTS.savedAlbums, container.dataset.albumId);
+        syncFeaturedSaveButton();
+        if (window.AppLayout) {
+          window.AppLayout.showToast(saved ? 'Album salvato nella tua libreria' : 'Album rimosso dalla tua libreria');
         }
-      } else {
-        window.location.href = `index.html?search=${encodeURIComponent(query)}`;
+        return;
       }
-    }
-  }
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const searchQuery = urlParams.get('search');
-  if (searchQuery) {
-    if (searchInput) searchInput.value = searchQuery;
-    if (mobileSearchInput) mobileSearchInput.value = searchQuery;
-
-    const contentArea = document.getElementById('content-area');
-    if (contentArea) {
-      let searchResultsHTML = `
-        <div class="row mb-4">
-          <div class="col-12">
-            <h2 class="text-white">Risultati per "${searchQuery}"</h2>
-          </div>
-        </div>
-        <div class="row" id="search-results">
-          
-        </div>
-      `;
-
-      contentArea.innerHTML = searchResultsHTML;
-
-      searchAlbumsInContent(searchQuery);
-    }
-  }
-}
-
-// ===================================================
-// DATA FETCHING FUNCTIONS
-// ===================================================
-
-function fetchRecentlyPlayed() {
-  const artists = ['eminem', 'taylor swift', 'ed sheeran', 'billie eilish', 'coldplay', 'daft punk', 'bruno mars', 'lady gaga', 'drake', 'dua lipa', 'the weeknd', 'rihanna', 'justin bieber', 'post malone', 'shawn mendes', 'ariana grande', 'khalid', 'halsey', 'j balvin', 'bts', 'lizzo', 'imagine dragons', 'nicki minaj', 'selena gomez', 'marshmello', 'tones and i', 'kacey musgraves', 'zayn', 'sia', 'harry styles', 'fetty wap', 'travis scott', 'future', 'the chain smokers', 'paramore', 'j cole', 'macklemore', 'clean bandit', 'alessia cara', 'fedez', 'salmo', 'charlie puth', 'meghan trainor', 'bebe rexha', 'brandi carlile', 'chris stapleton', 'sheryl crow', 'lil nas x', 'maroon 5', 'one republic'];
-
-  const randomArtist = artists[Math.floor(Math.random() * artists.length)];
-  const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/search?q=${randomArtist}&limit=6`;
-
-  fetch(apiUrl)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      displayRecentlyPlayed(data.data);
-    })
-    .catch(error => {
-      console.error('Error fetching recently played:', error);
-      const recentCards = document.querySelectorAll('.recent-card .card-body');
-      recentCards.forEach(card => {
-        card.innerHTML = `
-          <div class="alert alert-danger">
-            Errore nel caricamento: ${error.message}
-          </div>
-        `;
-      });
-    });
-}
-
-function fetchAlbums(query) {
-  const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/search?q=${query}`;
-
-  fetch(apiUrl)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      displayAlbums(data.data);
-    })
-    .catch(error => {
-      console.error('Error fetching albums:', error);
-      const albumListElement = document.getElementById('album-list');
-      if (albumListElement) {
-        albumListElement.innerHTML = `
-          <div class="col-12">
-            <div class="alert alert-danger">
-              Errore nel caricamento degli album: ${error.message}
-            </div>
-          </div>
-        `;
+      const card = event.target.closest('.album-card, .recent-card');
+      if (card) {
+        navigateCard(card);
       }
     });
-}
 
-function fetchTrendingMusic() {
-  const genres = ['pop', 'rap', 'electronic', 'indie', 'metal', 'rock', 'jazz', 'classical', 'blues', 'reggae', 'country', 'hip-hop', 'alternative', 'folk', 'punk', 'soul', 'R&B', 'disco', 'grunge', 'latin', 'synthwave'];
+    document.addEventListener('keydown', function (event) {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
 
-  const randomGenre = genres[Math.floor(Math.random() * genres.length)];
-  const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/search?q=${randomGenre}&limit=5`;
+      const target = event.target;
+      if (!target || !target.matches || !target.matches('[role="link"]')) return;
 
-  fetch(apiUrl)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      displayTrendingMusic(data.data);
-    })
-    .catch(error => {
-      console.error('Error fetching trending music:', error);
-      const trendingContainer = document.getElementById('trending-container');
-      if (trendingContainer) {
-        trendingContainer.innerHTML = `
-          <div class="col-12">
-            <div class="alert alert-danger">
-              Errore nel caricamento dei brani in tendenza: ${error.message}
-            </div>
-          </div>
-        `;
-      }
-    });
-}
-
-function fetchFeaturedAlbum() {
-  const featuredArtists = ['Fedez', 'Salmo', 'Dua Lipa', 'The Weeknd', 'Adele', 'Drake', 'Bruno Mars', 'Lady Gaga', 'Billie Eilish', 'Post Malone', 'Ed Sheeran', 'Tones and I', 'Sia', 'Shawn Mendes', 'Camila Cabello', 'Khalid', 'Charlie Puth', 'J Balvin', 'BTS', 'Taylor Swift', 'Maroon 5', 'Hozier', 'Katy Perry', 'Lizzo', 'Imagine Dragons', 'John Legend', 'Nicki Minaj', 'Ariana Grande', 'Travis Scott', 'Sam Smith', 'Lil Nas X', 'Marshmello', 'Miley Cyrus', 'Rihanna', 'Harry Styles', 'Pink', 'The Chainsmokers', 'J. Cole', 'Future', 'The Killers', 'Paramore', 'Snoop Dogg', 'Dr. Dre', 'Brandi Carlile', 'Chris Stapleton', 'Sheryl Crow', 'Demi Lovato', 'JoJo'];
-
-  const randomArtist = featuredArtists[Math.floor(Math.random() * featuredArtists.length)];
-  const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/search?q=${randomArtist}&limit=1`;
-
-  fetch(apiUrl)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.data && data.data.length > 0) {
-        displayFeaturedAlbum(data.data[0]);
-      } else {
-        throw new Error('No featured album data available');
-      }
-    })
-    .catch(error => {
-      console.error('Error fetching featured album:', error);
-      const featuredAlbumElement = document.getElementById('featured-album');
-      if (featuredAlbumElement) {
-        featuredAlbumElement.innerHTML = `
-          <div class="alert alert-danger">
-            Errore nel caricamento dell'album in evidenza: ${error.message}
-          </div>
-        `;
-      }
-    });
-}
-
-// ===================================================
-// DISPLAY FUNCTIONS
-// ===================================================
-
-function displayRecentlyPlayed(items) {
-  const recentCards = document.querySelectorAll('.recent-card .card-body');
-
-  const itemsToShow = Math.min(items.length, recentCards.length);
-
-  for (let i = 0; i < itemsToShow; i++) {
-    const item = items[i];
-    if (item && item.album && item.album.cover_small && item.title && item.artist && item.artist.name) {
-      recentCards[i].innerHTML = `
-          <img src="${item.album.cover_small}" class="recent-album-img" alt="${item.album.title}">
-          <div class="ms-3 overflow-hidden">
-            <span class="d-block text-truncate fw-bold">${item.title}</span>
-            <span class="d-block text-truncate small text-white-50">${item.artist.name}</span>
-          </div>
-        `;
-      const card = recentCards[i].closest('.recent-card');
-      card.dataset.albumId = item.album.id;
-      
-      if (item.preview) {
-        card.dataset.previewUrl = item.preview;
-      }
-      
-      card.style.cursor = 'pointer';
-    } else {
-      console.error("Missing data in recently played item:", item);
-      recentCards[i].innerHTML = "<p>Data not available</p>";
-    }
-  }
-}
-
-function displayTrendingMusic(items) {
-  const trendingCards = document.querySelectorAll('.album-card');
-
-  const itemsToShow = Math.min(items.length, trendingCards.length);
-
-  for (let i = 0; i < itemsToShow; i++) {
-    const item = items[i];
-    const card = trendingCards[i];
-    if (item && item.album && item.album.cover_medium && item.artist && item.artist.name && card) {
-      const imgElement = card.querySelector('.card-img-top');
-      const titleElement = card.querySelector('.card-title');
-      const textElement = card.querySelector('.card-text');
-
-      if (imgElement) imgElement.src = item.album.cover_medium;
-      if (imgElement) imgElement.alt = item.album.title;
-      if (titleElement) titleElement.textContent = item.album.title;
-      if (textElement) textElement.innerHTML = `
-          <a href="artist.html?id=${item.artist.id}" class="text-light text-decoration-none">${item.artist.name}</a>
-        `;
-
-      card.dataset.albumId = item.album.id;
-      
-      if (item.preview) {
-        card.dataset.previewUrl = item.preview;
-      }
-    } else {
-      console.error("Missing data in trending music item:", item);
-      if (card) card.innerHTML = "<p>Data not available</p>";
-    }
-  }
-}
-
-function displayFeaturedAlbum(item) {
-  if (!item || !item.album || !item.artist) {
-    console.error("Missing data in featured album item:", item);
-    return;
-  }
-
-  const featuredAlbumContainer = document.getElementById('featured-album');
-  const featuredAlbumImg = document.getElementById('featured-album-img');
-  const featuredAlbumTitle = document.getElementById('featured-album-title');
-  const featuredAlbumArtist = document.getElementById('featured-album-artist');
-  const featuredAlbumDescription = document.getElementById('featured-album-description');
-
-  if (featuredAlbumContainer) {
-    featuredAlbumContainer.dataset.albumId = item.album.id;
-    featuredAlbumContainer.dataset.artistId = item.artist.id;
-    if (item.preview) {
-      featuredAlbumContainer.dataset.previewUrl = item.preview;
-    }
-  }
-
-  if (featuredAlbumImg) {
-    if (window.innerWidth <= 768) {
-      featuredAlbumImg.src = item.album.cover_medium || item.album.cover_small;
-    } else {
-      featuredAlbumImg.src = item.album.cover_big || item.album.cover_medium;
-    }
-  }
-
-  if (featuredAlbumTitle) {
-    if (window.innerWidth <= 768 && (item.title || item.album.title).length > 30) {
-      featuredAlbumTitle.textContent = (item.title || item.album.title).substring(0, 30) + '...';
-    } else {
-      featuredAlbumTitle.textContent = item.title || item.album.title;
-    }
-  }
-
-  if (featuredAlbumArtist) {
-    featuredAlbumArtist.innerHTML = `
-      <a href="artist.html?id=${item.artist.id}" class="text-light text-decoration-none">${item.artist.name}</a>
-    `;
-  }
-
-  if (featuredAlbumDescription) {
-    featuredAlbumDescription.textContent = `Ascolta il nuovo singolo di ${item.artist.name}!`;
-  }
-
-  const featuredAlbumBg = document.querySelector('.featured-album-bg');
-  if (featuredAlbumBg) {
-    featuredAlbumBg.style.backgroundImage = `
-      linear-gradient(0deg, rgba(18, 18, 18, 1) 0%, rgba(18, 18, 18, 0.8) 50%, rgba(18, 18, 18, 0.4) 100%),
-      url(${item.album.cover_big || item.album.cover_medium})
-    `;
-    featuredAlbumBg.style.backgroundSize = 'cover';
-    featuredAlbumBg.style.backgroundPosition = 'center';
-  }
-
-  const playButton = featuredAlbumContainer.querySelector('.btn-success');
-  if (playButton) {
-    playButton.style.cursor = 'pointer';
-  }
-}
-
-function displayAlbums(albums) {
-  const albumListElement = document.getElementById('album-list');
-  if (!albumListElement) {
-    console.error('album-list element not found');
-    return;
-  }
-
-  albumListElement.innerHTML = '';
-
-  const uniqueAlbumIds = new Set();
-  const uniqueAlbums = [];
-
-  albums.forEach(item => {
-    if (item && item.album && item.album.id && item.artist && item.artist.id && !uniqueAlbumIds.has(item.album.id)) {
-      uniqueAlbumIds.add(item.album.id);
-      uniqueAlbums.push(item);
-    } else {
-      console.error("Missing data in album item:", item);
-    }
-  });
-
-  uniqueAlbums.slice(0, 12).forEach(item => {
-    const albumElement = document.createElement('div');
-    albumElement.className = 'col-6 col-sm-4 col-md-3 col-lg-2';
-    
-    const previewUrlAttr = item.preview ? `data-preview-url="${item.preview}"` : '';
-    
-    albumElement.innerHTML = `
-      <div class="card album-card position-relative" data-album-id="${item.album.id}" ${previewUrlAttr}>
-        <img src="${item.album.cover_medium}" class="card-img-top" alt="${item.album.title}">
-        <div class="play-hover">
-          <i class="bi bi-play-fill"></i>
-        </div>
-        <div class="card-body p-2">
-          <h5 class="card-title text-truncate">${item.album.title}</h5>
-          <p class="card-text text-truncate">
-            <a href="artist.html?id=${item.artist.id}" class="text-light text-decoration-none">${item.artist.name}</a>
-          </p>
-        </div>
-      </div>
-    `;
-    albumListElement.appendChild(albumElement);
-  });
-}
-
-// ===================================================
-// NAVIGATION FUNCTIONS
-// ===================================================
-
-function loadArtistDetails(artistId) {
-  console.log('Loading artist details for ID:', artistId);
-}
-
-function loadAlbumDetails(albumId) {
-  window.location.href = `album.html?id=${albumId}`;
-}
-
-function loadArtistDetails(artistId) {
-  window.location.href = `artist.html?id=${artistId}`;
-}
-
-// ===================================================
-// SEARCH RESULT FUNCTIONS
-// ===================================================
-
-function searchAlbums(query) {
-  if (query && query.trim() !== '') {
-    fetchAlbums(query);
-  }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.querySelector('.search-input');
-  if (searchInput) {
-    searchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        searchAlbums(e.target.value);
-      }
+      event.preventDefault();
+      navigateCard(target);
     });
   }
-});
 
-function searchAlbumsInContent(query) {
-  if (!query || query.trim() === '') return;
+  // ---------------------------------------------------
+  // AVVIO
+  // ---------------------------------------------------
 
-  const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/search?q=${encodeURIComponent(query)}`;
-
-  const searchResults = document.getElementById('search-results');
-  if (searchResults) {
-    searchResults.innerHTML = `<div class="col-12 text-center"><div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+  function init() {
+    setGreeting();
+    bindEvents();
+    loadFeaturedAlbum();
+    loadRecentlyPlayed();
+    loadAlbumList();
+    loadTrending();
   }
 
-  fetch(apiUrl)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      displaySearchResults(data.data);
-    })
-    .catch(error => {
-      console.error('Error fetching search results:', error);
-      if (searchResults) {
-        searchResults.innerHTML = `
-          <div class="col-12">
-            <div class="alert alert-danger">
-              Errore nel caricamento dei risultati: ${error.message}
-            </div>
-          </div>
-        `;
-      }
-    });
-}
-
-function displaySearchResults(items) {
-  const searchResults = document.getElementById('search-results');
-  if (!searchResults) {
-    console.error('search-results element not found');
-    return;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
-
-  searchResults.innerHTML = '';
-
-  if (!items || items.length === 0) {
-    searchResults.innerHTML = `
-      <div class="col-12">
-        <div class="alert alert-info">
-          Nessun risultato trovato. Prova con una ricerca diversa.
-        </div>
-      </div>
-    `;
-    return;
-  }
-
-  const uniqueAlbumIds = new Set();
-  const uniqueAlbums = [];
-
-  items.forEach(item => {
-    if (item && item.album && item.album.id && !uniqueAlbumIds.has(item.album.id)) {
-      uniqueAlbumIds.add(item.album.id);
-      uniqueAlbums.push(item);
-    }
-  });
-
-  uniqueAlbums.slice(0, 24).forEach(item => {
-    const albumElement = document.createElement('div');
-    albumElement.className = 'col-6 col-sm-4 col-md-3 col-lg-2 mb-4';
-    albumElement.innerHTML = `
-      <div class="card album-card position-relative" data-album-id="${item.album.id}">
-        <img src="${item.album.cover_medium}" class="card-img-top" alt="${item.album.title}">
-        <div class="play-hover">
-          <i class="bi bi-play-fill"></i>
-        </div>
-        <div class="card-body p-2">
-          <h5 class="card-title text-truncate">${item.album.title}</h5>
-          <p class="card-text text-truncate">
-            <a href="artist.html?id=${item.artist.id}" class="text-light text-decoration-none">${item.artist.name}</a>
-          </p>
-        </div>
-      </div>
-    `;
-    searchResults.appendChild(albumElement);
-  });
-}
+})();

@@ -1,445 +1,304 @@
 // ===================================================
-// INITIALIZATION AND EVENT LISTENERS
+// PAGINA ARTISTA
 // ===================================================
-document.addEventListener('DOMContentLoaded', function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const artistId = urlParams.get('id');
+// Carica i dati dell'artista, i brani piu' ascoltati e
+// la discografia. Tutto in un solo caricamento.
+// ===================================================
 
-  if (artistId) {
-    fetchArtistDetails(artistId);
-  } else {
-    showError('ID artista non specificato nell\'URL');
+(function () {
+  'use strict';
+
+  const U = window.AppUtils;
+
+  let currentArtist = null;
+
+  // ---------------------------------------------------
+  // CARICAMENTO
+  // ---------------------------------------------------
+
+  function getArtistId() {
+    return new URLSearchParams(window.location.search).get('id');
   }
 
-  setupSearch();
-  setupMobileSearch();
-});
+  async function loadArtist(artistId) {
+    const container = document.getElementById('artist-details-container');
+    if (!container) return;
 
-// ===================================================
-// ARTIST DATA FETCHING
-// ===================================================
+    U.showSpinner(container);
 
-function fetchArtistDetails(artistId) {
-  const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/artist/${artistId}`;
+    const results = await Promise.allSettled([
+      U.api.artist(artistId),
+      U.api.artistTop(artistId, 5),
+      U.api.artistAlbums(artistId)
+    ]);
 
-  fetch(apiUrl)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      displayArtistDetails(data);
-      fetchArtistTopTracks(artistId);
-      fetchArtistAlbums(artistId);
-    })
-    .catch(error => {
-      console.error('Error fetching artist details:', error);
-      document.getElementById('artist-details-container').innerHTML = `
-        <div class="alert alert-danger">
-          Errore nel caricamento dei dettagli dell'artista: ${error.message}
-        </div>
-      `;
-    });
-}
+    const artistResult = results[0];
+    const topResult = results[1];
+    const albumsResult = results[2];
 
-function fetchArtistTopTracks(artistId) {
-  const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/artist/${artistId}/top?limit=5`;
+    if (artistResult.status !== 'fulfilled' || !artistResult.value) {
+      console.error('Errore dettagli artista:', artistResult.reason);
+      U.showError(container, "Errore nel caricamento dell'artista. Riprova più tardi.");
+      return;
+    }
 
-  fetch(apiUrl)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      displayArtistTopTracks(data.data);
-      
-      if (window.musicPlayer) {
-        const audioPlayer = document.querySelector('audio');
-        if (audioPlayer) {
-          audioPlayer.addEventListener('ended', function() {
-            window.musicPlayer.playNext();
-          });
-        }
-      }
-    })
-    .catch(error => {
-      console.error('Error fetching artist top tracks:', error);
-      document.getElementById('top-tracks-container').innerHTML = `
-        <div class="alert alert-danger">
-          Errore nel caricamento dei brani più popolari: ${error.message}
-        </div>
-      `;
-    });
-}
+    currentArtist = artistResult.value;
+    renderArtist(currentArtist);
+    bindFollowButton(currentArtist);
 
-function fetchArtistAlbums(artistId) {
-  const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/artist/${artistId}/albums`;
-
-  fetch(apiUrl)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      displayArtistAlbums(data.data);
-    })
-    .catch(error => {
-      console.error('Error fetching artist albums:', error);
-      document.getElementById('discography-container').innerHTML = `
-        <div class="alert alert-danger">
-          Errore nel caricamento della discografia: ${error.message}
-        </div>
-      `;
-    });
-}
-
-// ===================================================
-// ARTIST UI RENDERING
-// ===================================================
-
-function displayArtistDetails(artist) {
-  const artistDetailsContainer = document.getElementById('artist-details-container');
-
-  artistDetailsContainer.innerHTML = `
-    <div class="artist-header" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url(${artist.picture_xl}) no-repeat center center; background-size: cover; padding: 200px 32px 32px 32px;">
-      <div class="d-flex align-items-center">
-        <img src="${artist.picture_medium}" alt="${artist.name}" class="rounded-circle me-3" width="80" height="80">
-        <div>
-          <h1 class="display-4 fw-bold">${artist.name}</h1>
-          <p class="mb-0">${artist.nb_fan.toLocaleString()} ascoltatori mensili</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="artist-actions p-4">
-      <button class="btn btn-success rounded-pill btn-play me-2"><i class="bi bi-play-fill"></i> Play</button>
-      <button class="btn btn-outline-light rounded-pill btn-follow me-2">Segui</button>
-      <button class="btn btn-link text-white"><i class="bi bi-three-dots"></i></button>
-    </div>
-
-    <div class="popular-tracks mt-4">
-      <h3 class="mb-4">Brani popolari</h3>
-      <div id="top-tracks-container">
-        <div class="d-flex justify-content-center">
-          <div class="spinner-border text-light" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="discography mt-5">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Discografia</h3>
-        <a href="#" class="see-more-link">Mostra altro</a>
-      </div>
-      <div id="discography-container" class="row">
-        <div class="d-flex justify-content-center">
-          <div class="spinner-border text-light" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="artist-footer p-4 mt-5">
-      <p class="text-white-50 small">© ${artist.name} - Tutti i diritti riservati</p>
-    </div>
-  `;
-
-  updatePlayerBar(artist);
-}
-
-function displayArtistTopTracks(tracks) {
-  const topTracksContainer = document.getElementById('top-tracks-container');
-
-  if (!tracks || tracks.length === 0) {
-    topTracksContainer.innerHTML = `<p>Nessun brano disponibile.</p>`;
-    return;
-  }
-
-  let tracksHTML = '';
-
-  tracks.forEach((track, index) => {
-    const minutes = Math.floor(track.duration / 60);
-    const seconds = track.duration % 60;
-
-    tracksHTML += `
-      <div class="popular-track" data-preview-url="${track.preview}" data-track-index="${index}">
-        <div class="popular-track-number">${index + 1}</div>
-        <div class="popular-track-info">
-          <img src="${track.album.cover_small}" alt="${track.album.title}" class="popular-track-img">
-          <div>
-            <div class="popular-track-title">${track.title}</div>
-          </div>
-        </div>
-        <div class="popular-track-streams d-none d-md-block">${Math.floor(Math.random() * 1000000).toLocaleString()} riproduzioni</div>
-        <div class="popular-track-duration">${minutes}:${seconds < 10 ? '0' + seconds : seconds}</div>
-      </div>
-    `;
-  });
-
-  topTracksContainer.innerHTML = tracksHTML;
-
-  const topTracks = document.querySelectorAll('.popular-track');
-  topTracks.forEach(track => {
-    track.style.cursor = 'pointer';
-    track.addEventListener('click', function() {
-      const previewUrl = this.dataset.previewUrl;
-      const trackIndex = parseInt(this.dataset.trackIndex);
-      if (previewUrl && window.musicPlayer && tracks[trackIndex]) {
-        const playlist = tracks.map(track => {
-          return {
-            title: track.title,
-            preview: track.preview,
-            artist: {
-              name: track.artist.name,
-              id: track.artist.id
-            },
-            album: {
-              cover_small: track.album.cover_small
-            },
-            duration: track.duration
-          };
-        });
-
-        window.musicPlayer.setPlaylist(playlist);
-
-        const track = tracks[trackIndex];
-        const trackInfo = {
-          title: track.title,
-          artist: {
-            name: track.artist.name,
-            id: track.artist.id
-          },
-          album: {
-            cover_small: track.album.cover_small
-          },
-          duration: track.duration
-        };
-        window.musicPlayer.play(previewUrl, trackInfo);
-      }
-    });
-  });
-
-  const artistPlayBtn = document.querySelector('.artist-actions .btn-play');
-  if (artistPlayBtn && tracks[0] && tracks[0].preview && window.musicPlayer) {
-    artistPlayBtn.addEventListener('click', function() {
-      const playlist = tracks.map(track => {
-        return {
-          title: track.title,
-          preview: track.preview,
-          artist: {
-            name: track.artist.name,
-            id: track.artist.id
-          },
-          album: {
-            cover_small: track.album.cover_small
-          },
-          duration: track.duration
-        };
-      });
-      
-      window.musicPlayer.setPlaylist(playlist);
-      
-      const trackInfo = {
-        title: tracks[0].title,
-        artist: {
-          name: tracks[0].artist.name,
-          id: tracks[0].artist.id
-        },
-        album: {
-          cover_small: tracks[0].album.cover_small
-        },
-        duration: tracks[0].duration
-      };
-      window.musicPlayer.play(tracks[0].preview, trackInfo);
-      
-      if (window.musicPlayer) {
-        const audioPlayer = document.querySelector('audio');
-        if (audioPlayer) {
-          audioPlayer.addEventListener('ended', function() {
-            window.musicPlayer.playNext();
-          });
-        }
-      }
-    });
-  }
-}
-
-function displayArtistAlbums(albums) {
-  const discographyContainer = document.getElementById('discography-container');
-
-  if (!albums || albums.length === 0) {
-    discographyContainer.innerHTML = `<p>Nessun album disponibile.</p>`;
-    return;
-  }
-
-  const uniqueAlbums = Array.from(new Map(albums.map(album => [album.title, album])).values());
-
-  let albumsHTML = '';
-
-  uniqueAlbums.slice(0, 6).forEach(album => {
-    albumsHTML += `
-      <div class="col-6 col-md-4 col-lg-2 mb-4">
-        <div class="card album-card" data-album-id="${album.id}">
-          <img src="${album.cover_medium}" class="card-img-top" alt="${album.title}">
-          <div class="play-hover">
-            <i class="bi bi-play-fill"></i>
-          </div>
-          <div class="card-body p-2">
-            <h5 class="card-title text-truncate">${album.title}</h5>
-            <p class="card-text text-truncate">${album.release_date.substring(0, 4)}</p>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-
-  discographyContainer.innerHTML = albumsHTML;
-
-  document.querySelectorAll('.album-card').forEach(card => {
-    card.addEventListener('click', function() {
-      window.location.href = `album.html?id=${this.dataset.albumId}`;
-    });
-  });
-}
-
-// ===================================================
-// PLAYER BAR UPDATES
-// ===================================================
-
-function updatePlayerBar(artist) {
-  const currentAlbumImg = document.querySelector('.current-album-img');
-  const trackNameElement = document.querySelector('.track-name');
-  const artistNameElement = document.querySelector('.artist-name');
-
-  if (currentAlbumImg) currentAlbumImg.src = artist.picture_small;
-  if (trackNameElement) trackNameElement.textContent = "Brani popolari";
-  if (artistNameElement) {
-    artistNameElement.innerHTML = `
-      <a href="artist.html?id=${artist.id}" class="text-white-50">${artist.name}</a>
-    `;
-  }
-}
-
-// ===================================================
-// SEARCH FUNCTIONALITY
-// ===================================================
-
-function setupSearch() {
-  const searchLink = document.getElementById('search-link');
-  const searchBox = document.getElementById('search-box');
-  const searchInput = document.getElementById('search-input');
-
-  if (searchLink && searchBox && searchInput) {
-    searchLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      if (searchBox.style.display === 'none' || searchBox.style.display === '') {
-        searchBox.style.display = 'block';
-        searchInput.focus();
-      } else {
-        searchBox.style.display = 'none';
-      }
-    });
-
-    searchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        const query = e.target.value.trim();
-        if (query) {
-          window.location.href = `index.html?search=${encodeURIComponent(query)}`;
-        }
-      }
-    });
-  }
-}
-
-function setupMobileSearch() {
-  const mobileSearchLink = document.getElementById('mobile-search-link');
-  const mobileSearchBox = document.getElementById('mobile-search-box');
-  const mobileSearchInput = document.getElementById('mobile-search-input');
-  const mobileSearchButton = document.getElementById('mobile-search-button');
-
-  if (mobileSearchLink && mobileSearchBox && mobileSearchInput) {
-    if (window.innerWidth < 992) {
-      mobileSearchLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location.href = 'search.html';
-      });
+    if (topResult.status === 'fulfilled') {
+      renderTopTracks(topResult.value, currentArtist);
     } else {
-      mobileSearchLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (mobileSearchBox.style.display === 'none' || mobileSearchBox.style.display === '') {
-          mobileSearchBox.style.display = 'block';
-          mobileSearchInput.focus();
-        } else {
-          mobileSearchBox.style.display = 'none';
-        }
-      });
+      U.showError('#top-tracks-container', 'Impossibile caricare i brani più ascoltati.');
     }
 
-    mobileSearchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        const query = e.target.value.trim();
-        if (query) {
-          if (window.innerWidth < 992) {
-            window.location.href = `search.html?search=${encodeURIComponent(query)}`;
-          } else {
-            window.location.href = `index.html?search=${encodeURIComponent(query)}`;
-          }
-        }
-      }
+    if (albumsResult.status === 'fulfilled') {
+      renderDiscography(albumsResult.value, currentArtist);
+    } else {
+      U.showError('#discography-container', 'Impossibile caricare la discografia.');
+    }
+  }
+
+  // ---------------------------------------------------
+  // RENDER
+  // ---------------------------------------------------
+
+  function renderArtist(artist) {
+    const container = document.getElementById('artist-details-container');
+    if (!container) return;
+
+    const background = artist.picture_xl || artist.picture_big || artist.picture_medium || '';
+    const backgroundStyle = background
+      ? ' style="background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.85)), url(&quot;' +
+        String(background).replace(/"/g, '%22') + '&quot;)"'
+      : '';
+
+    container.innerHTML =
+      '<header class="artist-header"' + backgroundStyle + '>' +
+        '<div class="artist-header-content">' +
+          (artist.picture_medium
+            ? '<img src="' + U.escapeHtml(artist.picture_medium) + '" alt="" class="artist-avatar" loading="lazy">'
+            : '') +
+          '<div class="artist-titles">' +
+            '<p class="artist-label">Artista</p>' +
+            '<h1 class="artist-title">' + U.escapeHtml(artist.name) + '</h1>' +
+            '<p class="artist-fans mb-0">' + U.formatNumber(artist.nb_fan) + ' ascoltatori mensili</p>' +
+          '</div>' +
+        '</div>' +
+      '</header>' +
+
+      '<div class="artist-actions">' +
+        '<button type="button" class="btn btn-success rounded-pill btn-play" id="artist-play-btn">' +
+          '<i class="bi bi-play-fill"></i> Play' +
+        '</button>' +
+        '<button type="button" class="btn btn-outline-light rounded-pill btn-follow" id="artist-follow-btn" aria-pressed="false">' +
+          'Segui' +
+        '</button>' +
+      '</div>' +
+
+      '<section class="popular-tracks">' +
+        '<div class="section-heading">' +
+          '<h2>Brani popolari</h2>' +
+        '</div>' +
+        '<div id="top-tracks-container" class="top-tracks"></div>' +
+      '</section>' +
+
+      '<section class="discography">' +
+        '<div class="section-heading">' +
+          '<h2>Discografia</h2>' +
+          '<a class="see-more-link" href="' + U.escapeHtml(U.pageUrl('search.html', { search: artist.name })) + '">Vedi altri</a>' +
+        '</div>' +
+        '<div id="discography-container" class="row g-3"></div>' +
+      '</section>' +
+
+      '<footer class="artist-footer">' +
+        '<p class="text-white-50 small mb-0">&copy; ' + U.escapeHtml(artist.name) + ' - Tutti i diritti riservati</p>' +
+      '</footer>';
+
+    document.title = artist.name + ' - Spotify Clone';
+    syncFollowButton(artist);
+  }
+
+  function normalizeTrack(track, artist) {
+    const album = track.album || {};
+
+    return {
+      id: track.id,
+      preview: track.preview || '',
+      title: track.title || 'Brano senza titolo',
+      artist: {
+        id: track.artist && track.artist.id ? track.artist.id : artist.id,
+        name: track.artist && track.artist.name ? track.artist.name : artist.name
+      },
+      album: {
+        id: album.id || '',
+        title: album.title || '',
+        cover_small: album.cover_small || album.cover_medium || 'img/cover_c.jpg'
+      },
+      duration: track.duration || 0
+    };
+  }
+
+  function renderTopTracks(tracks, artist) {
+    const container = document.getElementById('top-tracks-container');
+    if (!container) return;
+
+    if (!tracks || !tracks.length) {
+      container.innerHTML = '<p class="empty-state">Nessun brano disponibile.</p>';
+      return;
+    }
+
+    const normalized = tracks.map(function (track) {
+      return normalizeTrack(track, artist);
     });
 
-    if (mobileSearchButton) {
-      mobileSearchButton.addEventListener('click', function() {
-        const query = mobileSearchInput.value.trim();
-        if (query) {
-          if (window.innerWidth < 992) {
-            window.location.href = `search.html?search=${encodeURIComponent(query)}`;
-          } else {
-            window.location.href = `index.html?search=${encodeURIComponent(query)}`;
-          }
+    container.innerHTML = normalized.map(function (track, index) {
+      return (
+        '<div class="popular-track" role="button" tabindex="0"' +
+          ' data-preview-url="' + U.escapeHtml(track.preview) + '"' +
+          ' data-track-index="' + index + '"' +
+          ' aria-label="Riproduci ' + U.escapeHtml(track.title) + '">' +
+          '<div class="popular-track-number">' + (index + 1) + '</div>' +
+          '<div class="popular-track-info">' +
+            '<img src="' + U.escapeHtml(track.album.cover_small) + '" alt="" class="popular-track-img" loading="lazy">' +
+            '<div class="popular-track-text">' +
+              '<span class="popular-track-title">' + U.escapeHtml(track.title) + '</span>' +
+              '<span class="popular-track-album">' + U.escapeHtml(track.album.title) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="popular-track-duration">' + U.formatTime(track.duration) + '</div>' +
+        '</div>'
+      );
+    }).join('');
+
+    U.qsa('.popular-track').forEach(function (row) {
+      function activate() {
+        const index = Number(row.getAttribute('data-track-index'));
+        const track = normalized[index];
+        if (!track || !track.preview) {
+          if (window.AppLayout) window.AppLayout.showToast("Questo brano non ha un'anteprima disponibile");
+          return;
         }
+        window.musicPlayer.playFrom(normalized, index);
+      }
+
+      row.addEventListener('click', activate);
+      row.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          activate();
+        }
+      });
+    });
+
+    const playButton = document.getElementById('artist-play-btn');
+    if (playButton) {
+      playButton.addEventListener('click', function () {
+        const firstPlayable = normalized.findIndex(function (track) {
+          return !!track.preview;
+        });
+        if (firstPlayable === -1) {
+          if (window.AppLayout) window.AppLayout.showToast("Nessun brano riproducibile disponibile");
+          return;
+        }
+        window.musicPlayer.playFrom(normalized, firstPlayable);
       });
     }
   }
-}
 
-// ===================================================
-// INITIALIZATION
-// ===================================================
+  function renderDiscography(albums, artist) {
+    const container = document.getElementById('discography-container');
+    if (!container) return;
 
-document.addEventListener('DOMContentLoaded', function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const artistId = urlParams.get('id');
+    if (!albums || !albums.length) {
+      container.innerHTML = '<div class="col-12"><p class="empty-state">Nessun album disponibile.</p></div>';
+      return;
+    }
 
-  if (artistId) {
-    fetchArtistDetails(artistId);
-    fetchPlayerBarTrack();
-  } else {
-    showError("Artist ID not found in URL");
+    const seen = new Set();
+    const uniqueAlbums = albums.filter(function (album) {
+      if (!album || !album.id) return false;
+      const key = String(album.title || album.id);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 8);
+
+    container.innerHTML = uniqueAlbums.map(function (album) {
+      const rawDate = album.release_date ? String(album.release_date) : '';
+      const year = rawDate ? rawDate.slice(0, 4) : '';
+      const cover = album.cover_medium || album.cover_small || 'img/cover_c.jpg';
+      const url = U.pageUrl('album.html', { id: album.id });
+
+      return (
+        '<div class="col-6 col-sm-4 col-md-3 col-lg-2">' +
+          '<a class="card album-card discography-card" href="' + U.escapeHtml(url) + '">' +
+            '<img src="' + U.escapeHtml(cover) + '" class="card-img-top" alt="' + U.escapeHtml(album.title) + '" loading="lazy">' +
+            '<div class="card-body p-2">' +
+              '<h3 class="card-title text-truncate">' + U.escapeHtml(album.title) + '</h3>' +
+              '<p class="card-text text-truncate">' +
+                (year ? U.escapeHtml(year) : U.escapeHtml(artist.name)) +
+                ' &bull; Album' +
+              '</p>' +
+            '</div>' +
+          '</a>' +
+        '</div>'
+      );
+    }).join('');
   }
-});
 
-// ===================================================
-// UTILITY FUNCTIONS
-// ===================================================
+  // ---------------------------------------------------
+  // AZIONI
+  // ---------------------------------------------------
 
-function updatePageTitle(artistName) {
-  document.title = `${artistName} - Spotify Clone`;
-}
+  function syncFollowButton(artist) {
+    const button = document.getElementById('artist-follow-btn');
+    if (!button) return;
 
-function formatNumber(num) {
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
+    const following = U.isInList(U.LISTS.followedArtists, artist.id);
+    button.textContent = following ? 'Segui già' : 'Segui';
+    button.classList.toggle('is-following', following);
+    button.setAttribute('aria-pressed', following ? 'true' : 'false');
+  }
 
-function showError(message) {
-    console.error(message);
-}
+  function bindFollowButton(artist) {
+    const button = document.getElementById('artist-follow-btn');
+    if (!button) return;
+
+    button.addEventListener('click', function () {
+      const following = U.toggleInList(U.LISTS.followedArtists, artist.id);
+      syncFollowButton(artist);
+      if (window.AppLayout) {
+        window.AppLayout.showToast(following ? 'Ora segui ' + artist.name : 'Non segui più ' + artist.name);
+      }
+    });
+  }
+
+  // ---------------------------------------------------
+  // AVVIO
+  // ---------------------------------------------------
+
+  function init() {
+    const container = document.getElementById('artist-details-container');
+    if (!container) return;
+
+    const artistId = getArtistId();
+    if (!artistId) {
+      U.showError(container, "Nessun artista specificato: torna alla home e scegli un artista.");
+      return;
+    }
+
+    // Il pulsante "Segui" viene creato dal render e agganciato subito dopo.
+    loadArtist(artistId);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  window.artistPage = {
+    getArtist: function () { return currentArtist; }
+  };
+})();
