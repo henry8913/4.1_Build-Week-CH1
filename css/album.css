@@ -106,7 +106,7 @@
 .track-list-header,
 .track-list-row {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) 56px;
+  grid-template-columns: 32px minmax(0, 1fr) 32px 56px;
   gap: 12px;
   align-items: center;
 }
@@ -137,6 +137,27 @@
   color: var(--spotify-light-gray);
   font-size: 14px;
   font-variant-numeric: tabular-nums;
+}
+
+.track-add {
+  border: 0;
+  background: none;
+  color: var(--spotify-light-gray);
+  padding: 2px;
+  line-height: 1;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.track-list-row:hover .track-add,
+.track-list-row:focus-within .track-add,
+.track-add:focus-visible {
+  opacity: 1;
+}
+
+.track-add:hover {
+  color: #fff;
 }
 
 .track-main {
@@ -172,6 +193,12 @@
 .track-list-row.is-playing .track-title,
 .track-list-row.is-playing .track-number {
   color: var(--spotify-green);
+}
+
+@media (hover: none) {
+  .track-add {
+    opacity: 1;
+  }
 }
 
 /* ---------------------------------------------------
@@ -231,7 +258,7 @@
 
   .track-list-header,
   .track-list-row {
-    grid-template-columns: 24px minmax(0, 1fr) 44px;
+    grid-template-columns: 24px minmax(0, 1fr) 28px 44px;
     gap: 8px;
   }
 
@@ -245,6 +272,10 @@
 
   .track-title {
     font-size: 14px;
+  }
+
+  .track-add {
+    opacity: 1;
   }
 
   .track-artist {

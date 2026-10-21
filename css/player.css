@@ -184,6 +184,16 @@
   color: #fff;
 }
 
+.add-to-playlist-btn {
+  color: var(--spotify-light-gray);
+  padding: 4px 6px;
+  flex: 0 0 auto;
+}
+
+.add-to-playlist-btn:hover {
+  color: #fff;
+}
+
 .volume-container {
   width: 100px;
   flex: 0 0 auto;
@@ -265,6 +275,15 @@
 .mobile-like-btn {
   font-size: 1rem;
   color: var(--spotify-light-gray) !important;
+}
+
+.mobile-add-btn {
+  font-size: 1rem;
+  color: var(--spotify-light-gray) !important;
+}
+
+.mobile-add-btn:hover {
+  color: #fff !important;
 }
 
 .mobile-like-btn.is-active,

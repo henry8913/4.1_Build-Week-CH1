@@ -14,7 +14,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
-const PAGES = ['index.html', 'album.html', 'artist.html', 'search.html'];
+const PAGES = ['index.html', 'album.html', 'artist.html', 'search.html', 'liked.html', 'library.html', 'playlist.html'];
 
 const errors = [];
 const checkedFiles = new Set();
@@ -73,7 +73,7 @@ function checkPage(page) {
     }
   });
 
-  const expectedScripts = ['js/utils.js', 'js/layout.js', 'js/player.js'];
+  const expectedScripts = ['js/utils.js', 'js/music-api.js', 'js/library.js', 'js/layout.js', 'js/player.js'];
   expectedScripts.forEach(function (script) {
     if (!html.includes('src="' + script + '"')) {
       errors.push(page + ': script condiviso mancante -> ' + script);

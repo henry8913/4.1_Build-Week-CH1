@@ -1,32 +1,69 @@
 // ===================================================
 // PAGINA CERCA
 // ===================================================
-// Ricerca con debounce, categorie sfogliabili e
-// risultati riproducibili. Funziona su desktop e mobile.
+// Ricerca con debounce e categorie sfogliabili.
+// Le categorie mantengono le immagini originali.
 // ===================================================
 
 (function () {
   'use strict';
 
   const U = window.AppUtils;
+  const MusicApi = window.MusicApi;
 
   const CATEGORIES = [
-    { name: 'Podcast', query: 'podcast', icon: 'bi-mic-fill', cssClass: 'cat-podcast' },
-    { name: 'Create per te', query: 'new music', icon: 'bi-stars', cssClass: 'cat-create' },
-    { name: 'Nuove uscite', query: 'new releases', icon: 'bi-calendar-plus-fill', cssClass: 'cat-new' },
-    { name: 'Pop', query: 'pop', icon: 'bi-star-fill', cssClass: 'cat-pop' },
-    { name: 'Hip Hop', query: 'hip hop', icon: 'bi-music-note-beamed', cssClass: 'cat-hiphop' },
-    { name: 'Dance / Elettronica', query: 'dance', icon: 'bi-lightning-charge-fill', cssClass: 'cat-dance' },
-    { name: 'Latina', query: 'latin', icon: 'bi-suit-spade-fill', cssClass: 'cat-latina' },
-    { name: 'Classifiche', query: 'top hits', icon: 'bi-bar-chart-fill', cssClass: 'cat-charts' }
+    {
+      name: 'Podcast',
+      query: 'podcast',
+      cssClass: 'podcast',
+      image: 'https://i.pinimg.com/736x/de/6d/9d/de6d9d40ad5f4ca6b519fd29000775c6.jpg'
+    },
+    {
+      name: 'Create per te',
+      query: 'new music',
+      cssClass: 'create',
+      image: 'https://i.pinimg.com/736x/c1/90/3b/c1903b54b02b86b0062fdd247c0e1ed6.jpg'
+    },
+    {
+      name: 'Nuove uscite',
+      query: 'new releases',
+      cssClass: 'nuove-uscite',
+      image: 'https://i.pinimg.com/736x/ae/18/d6/ae18d636caad14a8824fdc93622cfedf.jpg'
+    },
+    {
+      name: 'Pop',
+      query: 'pop',
+      cssClass: 'pop',
+      image: 'https://i.pinimg.com/736x/56/14/68/561468b31eed008ad5c03bd776dc3380.jpg'
+    },
+    {
+      name: 'Hip Hop',
+      query: 'hip hop',
+      cssClass: 'hip-hop',
+      image: 'https://i.pinimg.com/736x/2d/26/c2/2d26c2d50ae2b4eaeaadc7706896ebe4.jpg'
+    },
+    {
+      name: 'Dance/ Elettronica',
+      query: 'dance',
+      cssClass: 'dance',
+      image: 'https://i.pinimg.com/736x/57/1a/84/571a840678559f8159d8508a390d34b7.jpg'
+    },
+    {
+      name: 'Latina',
+      query: 'latin',
+      cssClass: 'latina',
+      image: 'https://i.pinimg.com/736x/f0/9e/41/f09e4125c0f9f86bf47d1db81dd75caa.jpg'
+    },
+    {
+      name: 'Classifiche',
+      query: 'top hits',
+      cssClass: 'classifiche',
+      image: 'https://i.pinimg.com/736x/54/38/03/543803e5d6c93e60bc9449a4955b47f0.jpg'
+    }
   ];
 
   let activeResults = [];
   let lastQuery = '';
-
-  // ---------------------------------------------------
-  // CATEGORIE
-  // ---------------------------------------------------
 
   function renderCategories() {
     const container = document.getElementById('search-categories');
@@ -36,7 +73,7 @@
       return (
         '<button type="button" class="category-card ' + category.cssClass + '" data-query="' + U.escapeHtml(category.query) + '">' +
           '<span>' + U.escapeHtml(category.name) + '</span>' +
-          '<i class="bi ' + category.icon + '" aria-hidden="true"></i>' +
+          '<img src="' + U.escapeHtml(category.image) + '" alt="" loading="lazy">' +
         '</button>'
       );
     }).join('');
@@ -68,11 +105,9 @@
 
   function updateUrl(query) {
     if (!window.history || !window.history.replaceState) return;
-
     const url = query
       ? U.pageUrl(window.location.pathname, { search: query })
       : window.location.pathname;
-
     window.history.replaceState({ query: query }, '', url);
   }
 
@@ -90,13 +125,12 @@
     if (!container) return;
 
     U.showSpinner(container);
-
     if (updateHistory !== false) updateUrl(query);
 
-    U.api.search(query)
-      .then(function (items) {
-        if (lastQuery !== query) return; // risposta vecchia: la ignoriamo
-        renderResults(items, query);
+    MusicApi.search(query)
+      .then(function (tracks) {
+        if (lastQuery !== query) return;
+        renderResults(tracks, query);
       })
       .catch(function (error) {
         console.error('Errore ricerca:', error);
@@ -109,24 +143,23 @@
   // RISULTATI
   // ---------------------------------------------------
 
-  function renderResults(items, query) {
+  function renderResults(tracks, query) {
     const container = document.getElementById('search-results');
     if (!container) return;
 
     const seen = new Set();
-    const albums = (items || []).filter(function (item) {
-      if (!item || !item.album || !item.album.id || !item.artist) return false;
-      const key = String(item.album.id);
+    const items = (tracks || []).filter(function (track) {
+      if (!track || !track.album || !track.album.id) return false;
+      const key = String(track.album.id);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
 
-    activeResults = albums;
-
+    activeResults = items;
     document.title = query + ' - Cerca - Spotify Clone';
 
-    if (!albums.length) {
+    if (!items.length) {
       container.innerHTML =
         '<h2 class="search-results-title">Risultati per "' + U.escapeHtml(query) + '"</h2>' +
         '<div class="empty-state">' +
@@ -140,31 +173,30 @@
     container.innerHTML =
       '<h2 class="search-results-title">Risultati per "' + U.escapeHtml(query) + '"</h2>' +
       '<div class="row g-3" id="results-grid">' +
-        albums.slice(0, 24).map(function (item) {
-          const album = item.album;
-          const cover = album.cover_medium || album.cover_small || 'img/cover_c.jpg';
-          const title = album.title || 'Album senza titolo';
-          const artistName = item.artist.name || 'Artista sconosciuto';
+        items.slice(0, 24).map(function (track) {
+          const cover = track.album.cover || track.album.coverSmall;
+          const title = track.album.title || track.title;
 
           return (
             '<div class="col-6 col-sm-4 col-md-3 col-lg-2">' +
               '<div class="card album-card" role="link" tabindex="0"' +
-                ' data-album-id="' + U.escapeHtml(album.id) + '"' +
-                ' data-track-id="' + U.escapeHtml(item.id !== undefined && item.id !== null ? item.id : '') + '"' +
-                ' data-album-title="' + U.escapeHtml(title) + '"' +
-                ' data-artist-id="' + U.escapeHtml(item.artist.id) + '"' +
-                ' data-artist-name="' + U.escapeHtml(artistName) + '"' +
-                ' data-title="' + U.escapeHtml(item.title || title) + '"' +
-                ' data-cover="' + U.escapeHtml(cover) + '"' +
-                ' data-preview-url="' + U.escapeHtml(item.preview || '') + '"' +
-                ' data-album-url="' + U.escapeHtml(U.pageUrl('album.html', { id: album.id })) + '">' +
+                ' data-album-id="' + U.escapeHtml(track.album.id) + '"' +
+                ' data-track-id="' + U.escapeHtml(track.id) + '"' +
+                ' data-album-title="' + U.escapeHtml(track.album.title) + '"' +
+                ' data-artist-id="' + U.escapeHtml(track.artist.id) + '"' +
+                ' data-artist-name="' + U.escapeHtml(track.artist.name) + '"' +
+                ' data-title="' + U.escapeHtml(track.title) + '"' +
+                ' data-cover="' + U.escapeHtml(track.album.coverSmall) + '"' +
+                ' data-preview-url="' + U.escapeHtml(track.streamUrl) + '"' +
+                ' data-duration="' + U.escapeHtml(track.duration) + '"' +
+                ' data-album-url="' + U.escapeHtml(U.pageUrl('album.html', { id: track.album.id })) + '">' +
                 '<img src="' + U.escapeHtml(cover) + '" class="card-img-top" alt="' + U.escapeHtml(title) + '" loading="lazy">' +
-                '<span class="play-hover" role="button" tabindex="-1" aria-label="Riproduci ' + U.escapeHtml(item.title || title) + '">' +
+                '<span class="play-hover" role="button" tabindex="-1" aria-label="Riproduci ' + U.escapeHtml(track.title) + '">' +
                   '<i class="bi bi-play-fill"></i>' +
                 '</span>' +
                 '<div class="card-body p-2">' +
                   '<h3 class="card-title text-truncate">' + U.escapeHtml(title) + '</h3>' +
-                  '<p class="card-text text-truncate">' + U.escapeHtml(artistName) + '</p>' +
+                  '<p class="card-text text-truncate">' + U.escapeHtml(track.artist.name) + '</p>' +
                 '</div>' +
               '</div>' +
             '</div>'
@@ -179,9 +211,10 @@
 
   function trackFromCard(card) {
     return {
+      id: card.getAttribute('data-track-id') || '',
+      streamUrl: card.getAttribute('data-preview-url') || '',
       preview: card.getAttribute('data-preview-url') || '',
       title: card.getAttribute('data-title') || '',
-      id: card.getAttribute('data-track-id') || '',
       artist: {
         id: card.getAttribute('data-artist-id') || '',
         name: card.getAttribute('data-artist-name') || ''
@@ -189,9 +222,10 @@
       album: {
         id: card.getAttribute('data-album-id') || '',
         title: card.getAttribute('data-album-title') || '',
-        cover_small: card.getAttribute('data-cover') || ''
+        cover: card.getAttribute('data-cover') || '',
+        coverSmall: card.getAttribute('data-cover') || ''
       },
-      duration: 30
+      duration: Number(card.getAttribute('data-duration')) || 30
     };
   }
 
@@ -205,16 +239,15 @@
 
       if (hover && card) {
         event.preventDefault();
-        const cards = U.qsa('.album-card[data-preview-url]', container);
-        const playable = cards.filter(function (element) {
+        const cards = U.qsa('.album-card', container).filter(function (element) {
           return element.getAttribute('data-preview-url');
         });
-        if (!playable.length) {
-          if (window.AppLayout) window.AppLayout.showToast("Nessun brano con anteprima in questi risultati");
+        if (!cards.length) {
+          if (window.AppLayout) window.AppLayout.showToast('Nessun brano con anteprima in questi risultati');
           return;
         }
-        const index = playable.indexOf(card);
-        window.musicPlayer.playFrom(playable.map(trackFromCard), index === -1 ? 0 : index);
+        const index = cards.indexOf(card);
+        window.musicPlayer.playFrom(cards.map(trackFromCard), index === -1 ? 0 : index);
         return;
       }
 

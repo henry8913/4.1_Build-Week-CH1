@@ -1,20 +1,17 @@
 // ===================================================
 // PAGINA ARTISTA
 // ===================================================
-// Carica i dati dell'artista, i brani piu' ascoltati e
-// la discografia. Tutto in un solo caricamento.
+// Dati artista, brani piu' ascoltati e discografia.
 // ===================================================
 
 (function () {
   'use strict';
 
   const U = window.AppUtils;
+  const MusicApi = window.MusicApi;
+  const Library = window.AppLibrary;
 
   let currentArtist = null;
-
-  // ---------------------------------------------------
-  // CARICAMENTO
-  // ---------------------------------------------------
 
   function getArtistId() {
     return new URLSearchParams(window.location.search).get('id');
@@ -27,9 +24,9 @@
     U.showSpinner(container);
 
     const results = await Promise.allSettled([
-      U.api.artist(artistId),
-      U.api.artistTop(artistId, 5),
-      U.api.artistAlbums(artistId)
+      MusicApi.getArtist(artistId),
+      MusicApi.getArtistTop(artistId, 5),
+      MusicApi.getArtistAlbums(artistId)
     ]);
 
     const artistResult = results[0];
@@ -67,7 +64,7 @@
     const container = document.getElementById('artist-details-container');
     if (!container) return;
 
-    const background = artist.picture_xl || artist.picture_big || artist.picture_medium || '';
+    const background = artist.picture || artist.pictureMedium || '';
     const backgroundStyle = background
       ? ' style="background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.85)), url(&quot;' +
         String(background).replace(/"/g, '%22') + '&quot;)"'
@@ -76,13 +73,13 @@
     container.innerHTML =
       '<header class="artist-header"' + backgroundStyle + '>' +
         '<div class="artist-header-content">' +
-          (artist.picture_medium
-            ? '<img src="' + U.escapeHtml(artist.picture_medium) + '" alt="" class="artist-avatar" loading="lazy">'
+          (artist.pictureMedium
+            ? '<img src="' + U.escapeHtml(artist.pictureMedium) + '" alt="" class="artist-avatar" loading="lazy">'
             : '') +
           '<div class="artist-titles">' +
             '<p class="artist-label">Artista</p>' +
             '<h1 class="artist-title">' + U.escapeHtml(artist.name) + '</h1>' +
-            '<p class="artist-fans mb-0">' + U.formatNumber(artist.nb_fan) + ' ascoltatori mensili</p>' +
+            '<p class="artist-fans mb-0">' + U.formatNumber(artist.fans) + ' ascoltatori mensili</p>' +
           '</div>' +
         '</div>' +
       '</header>' +
@@ -119,26 +116,6 @@
     syncFollowButton(artist);
   }
 
-  function normalizeTrack(track, artist) {
-    const album = track.album || {};
-
-    return {
-      id: track.id,
-      preview: track.preview || '',
-      title: track.title || 'Brano senza titolo',
-      artist: {
-        id: track.artist && track.artist.id ? track.artist.id : artist.id,
-        name: track.artist && track.artist.name ? track.artist.name : artist.name
-      },
-      album: {
-        id: album.id || '',
-        title: album.title || '',
-        cover_small: album.cover_small || album.cover_medium || 'img/cover_c.jpg'
-      },
-      duration: track.duration || 0
-    };
-  }
-
   function renderTopTracks(tracks, artist) {
     const container = document.getElementById('top-tracks-container');
     if (!container) return;
@@ -148,19 +125,16 @@
       return;
     }
 
-    const normalized = tracks.map(function (track) {
-      return normalizeTrack(track, artist);
-    });
-
-    container.innerHTML = normalized.map(function (track, index) {
+    container.innerHTML = tracks.map(function (track, index) {
       return (
         '<div class="popular-track" role="button" tabindex="0"' +
-          ' data-preview-url="' + U.escapeHtml(track.preview) + '"' +
+          ' data-preview-url="' + U.escapeHtml(track.streamUrl) + '"' +
+          ' data-track-id="' + U.escapeHtml(track.id) + '"' +
           ' data-track-index="' + index + '"' +
           ' aria-label="Riproduci ' + U.escapeHtml(track.title) + '">' +
           '<div class="popular-track-number">' + (index + 1) + '</div>' +
           '<div class="popular-track-info">' +
-            '<img src="' + U.escapeHtml(track.album.cover_small) + '" alt="" class="popular-track-img" loading="lazy">' +
+            '<img src="' + U.escapeHtml(track.album.coverSmall) + '" alt="" class="popular-track-img" loading="lazy">' +
             '<div class="popular-track-text">' +
               '<span class="popular-track-title">' + U.escapeHtml(track.title) + '</span>' +
               '<span class="popular-track-album">' + U.escapeHtml(track.album.title) + '</span>' +
@@ -174,12 +148,12 @@
     U.qsa('.popular-track').forEach(function (row) {
       function activate() {
         const index = Number(row.getAttribute('data-track-index'));
-        const track = normalized[index];
-        if (!track || !track.preview) {
+        const track = tracks[index];
+        if (!track || !track.streamUrl) {
           if (window.AppLayout) window.AppLayout.showToast("Questo brano non ha un'anteprima disponibile");
           return;
         }
-        window.musicPlayer.playFrom(normalized, index);
+        window.musicPlayer.playFrom(tracks, index);
       }
 
       row.addEventListener('click', activate);
@@ -194,14 +168,14 @@
     const playButton = document.getElementById('artist-play-btn');
     if (playButton) {
       playButton.addEventListener('click', function () {
-        const firstPlayable = normalized.findIndex(function (track) {
-          return !!track.preview;
+        const firstPlayable = tracks.findIndex(function (track) {
+          return !!track.streamUrl;
         });
         if (firstPlayable === -1) {
-          if (window.AppLayout) window.AppLayout.showToast("Nessun brano riproducibile disponibile");
+          if (window.AppLayout) window.AppLayout.showToast('Nessun brano riproducibile disponibile');
           return;
         }
-        window.musicPlayer.playFrom(normalized, firstPlayable);
+        window.musicPlayer.playFrom(tracks, firstPlayable);
       });
     }
   }
@@ -225,9 +199,7 @@
     }).slice(0, 8);
 
     container.innerHTML = uniqueAlbums.map(function (album) {
-      const rawDate = album.release_date ? String(album.release_date) : '';
-      const year = rawDate ? rawDate.slice(0, 4) : '';
-      const cover = album.cover_medium || album.cover_small || 'img/cover_c.jpg';
+      const cover = album.cover;
       const url = U.pageUrl('album.html', { id: album.id });
 
       return (
@@ -237,7 +209,7 @@
             '<div class="card-body p-2">' +
               '<h3 class="card-title text-truncate">' + U.escapeHtml(album.title) + '</h3>' +
               '<p class="card-text text-truncate">' +
-                (year ? U.escapeHtml(year) : U.escapeHtml(artist.name)) +
+                (album.year ? U.escapeHtml(album.year) : U.escapeHtml(artist.name)) +
                 ' &bull; Album' +
               '</p>' +
             '</div>' +
@@ -255,7 +227,7 @@
     const button = document.getElementById('artist-follow-btn');
     if (!button) return;
 
-    const following = U.isInList(U.LISTS.followedArtists, artist.id);
+    const following = Library.isArtistFollowed(artist.id);
     button.textContent = following ? 'Segui già' : 'Segui';
     button.classList.toggle('is-following', following);
     button.setAttribute('aria-pressed', following ? 'true' : 'false');
@@ -266,7 +238,7 @@
     if (!button) return;
 
     button.addEventListener('click', function () {
-      const following = U.toggleInList(U.LISTS.followedArtists, artist.id);
+      const following = Library.toggleArtist(artist);
       syncFollowButton(artist);
       if (window.AppLayout) {
         window.AppLayout.showToast(following ? 'Ora segui ' + artist.name : 'Non segui più ' + artist.name);
@@ -284,12 +256,16 @@
 
     const artistId = getArtistId();
     if (!artistId) {
-      U.showError(container, "Nessun artista specificato: torna alla home e scegli un artista.");
+      U.showError(container, 'Nessun artista specificato: torna alla home e scegli un artista.');
       return;
     }
 
-    // Il pulsante "Segui" viene creato dal render e agganciato subito dopo.
     loadArtist(artistId);
+    document.addEventListener('library:changed', function (event) {
+      if (currentArtist && (!event.detail || event.detail.key === Library.KEYS.artists)) {
+        syncFollowButton(currentArtist);
+      }
+    });
   }
 
   if (document.readyState === 'loading') {
