@@ -1,250 +1,282 @@
+/* ===================================================
+   PAGINA ARTISTA
+   =================================================== */
 
-/* Artist page specific styles */
+#artist-details-container {
+  padding-bottom: 32px;
+}
+
 .artist-header {
-  height: 40vh;
-  min-height: 340px;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  align-items: flex-end;
+  min-height: 340px;
   padding: 32px;
-  color: white;
   background-size: cover;
   background-position: center 30%;
   position: relative;
 }
 
-/* Ottimizzazione mobile per la pagina artist */
-@media (max-width: 768px) {
-  .artist-header {
-    height: auto;
-    min-height: 220px;
-    padding: 16px;
-    text-align: center;
-  }
-  
-  .artist-header .d-flex {
-    flex-direction: column;
-    align-items: center !important;
-  }
-  
-  .artist-header img.rounded-circle {
-    margin-bottom: 12px;
-    margin-right: 0 !important;
-    width: 100px;
-    height: 100px;
-  }
-  
-  .artist-header h1.display-4 {
-    font-size: 28px;
-  }
-  
-  .artist-actions {
-    justify-content: center;
-    flex-wrap: wrap;
-    padding: 10px !important;
-  }
-  
-  .popular-tracks, .discography {
-    padding: 0 16px !important;
-  }
-  
-  .popular-track {
-    grid-template-columns: 24px 1fr 60px !important;
-    padding: 8px !important;
-  }
-  
-  .popular-track-streams {
-    display: none;
-  }
-}
-
-.artist-header::before {
+.artist-header::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+  inset: 0;
+  background: linear-gradient(to top, rgba(18, 18, 18, 0.9), transparent 70%);
+  pointer-events: none;
 }
 
-.artist-details {
+.artist-header-content {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  min-width: 0;
 }
 
-.verified-badge {
-  background-color: #3D91F4;
-  color: white;
+.artist-avatar {
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 8px;
-  font-size: 12px;
+  object-fit: cover;
+  flex: 0 0 auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
 }
 
-.artist-name {
-  font-size: 72px;
-  font-weight: 900;
-  margin: 20px 0;
+.artist-titles {
+  min-width: 0;
 }
 
-.artist-stats {
-  font-size: 14px;
-  color: rgba(255,255,255,0.7);
+.artist-label {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.artist-title {
+  font-size: clamp(32px, 6vw, 72px);
+  font-weight: 800;
+  line-height: 1.02;
+  margin: 0 0 10px;
+  overflow-wrap: anywhere;
+}
+
+.artist-fans {
+  font-size: 13px;
+  color: #d0d0d0;
 }
 
 .artist-actions {
-  margin-top: 24px;
   display: flex;
   align-items: center;
+  gap: 16px;
+  padding: 16px 32px 8px;
 }
 
-.btn-play-large {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background-color: var(--spotify-green);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 16px;
-  color: black;
-  border: none;
-  font-size: 24px;
-}
-
-.btn-following {
-  border: 1px solid rgba(255,255,255,0.7);
-  background-color: transparent;
-  color: white;
-  border-radius: 500px;
-  padding: 8px 24px;
+.artist-actions .btn-play {
+  padding: 12px 34px;
+  font-size: 15px;
   font-weight: 700;
-  margin-right: 16px;
 }
 
-.section-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin: 32px 0 16px;
+.artist-actions .btn-follow {
+  padding: 10px 24px;
+  font-size: 14px;
 }
 
-.popular-tracks {
-  padding: 0 32px;
+.artist-actions .btn-follow.is-following {
+  border-color: var(--spotify-green);
+  color: var(--spotify-green);
+}
+
+/* ---------------------------------------------------
+   BRANI POPOLARI
+   --------------------------------------------------- */
+
+.popular-tracks,
+.discography {
+  padding: 16px 32px 0;
+}
+
+.top-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .popular-track {
   display: grid;
-  grid-template-columns: 16px 4fr 3fr 16px;
-  padding: 8px 16px;
-  border-radius: 4px;
+  grid-template-columns: 32px minmax(0, 1fr) 56px;
+  gap: 12px;
   align-items: center;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
-.popular-track:hover {
-  background-color: rgba(255,255,255,0.1);
+.popular-track:hover,
+.popular-track:focus-visible {
+  background-color: rgba(255, 255, 255, 0.09);
 }
 
 .popular-track-number {
   color: var(--spotify-light-gray);
   font-size: 14px;
+  font-variant-numeric: tabular-nums;
 }
 
 .popular-track-info {
   display: flex;
   align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 
 .popular-track-img {
   width: 40px;
   height: 40px;
-  margin-right: 16px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex: 0 0 auto;
+  background-color: #2a2a2a;
+}
+
+.popular-track-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .popular-track-title {
+  font-size: 15px;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.popular-track-streams {
+.popular-track-album {
+  font-size: 12px;
   color: var(--spotify-light-gray);
-  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .popular-track-duration {
   text-align: right;
   color: var(--spotify-light-gray);
-  font-size: 14px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
 }
+
+.popular-track.is-playing .popular-track-title,
+.popular-track.is-playing .popular-track-number {
+  color: var(--spotify-green);
+}
+
+/* ---------------------------------------------------
+   DISCOGRAFIA
+   --------------------------------------------------- */
 
 .discography {
-  padding: 0 32px;
+  margin-top: 24px;
 }
+
+.discography-card {
+  height: 100%;
+}
+
+.discography-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  background-color: #2a2a2a;
+}
+
+.artist-footer {
+  margin-top: 40px;
+  padding: 24px 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ---------------------------------------------------
+   RESPONSIVE
+   --------------------------------------------------- */
 
 @media (max-width: 768px) {
-  .discography .card-title {
+  .artist-header {
+    min-height: 260px;
+    padding: 20px 16px 16px;
+    background-position: center;
+  }
+
+  .artist-header-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .artist-avatar {
+    width: 88px;
+    height: 88px;
+  }
+
+  .artist-title {
+    font-size: 30px;
+  }
+
+  .artist-label,
+  .artist-fans {
+    text-align: center;
+  }
+
+  .artist-actions {
+    justify-content: center;
+    padding: 12px 16px 4px;
+    gap: 10px;
+  }
+
+  .artist-actions .btn-play {
+    padding: 10px 26px;
+  }
+
+  .popular-tracks,
+  .discography {
+    padding: 12px 12px 0;
+  }
+
+  .popular-track {
+    grid-template-columns: 22px minmax(0, 1fr) 44px;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .popular-track-img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .popular-track-title {
     font-size: 14px;
   }
-  
-  .discography .card-text {
+
+  .popular-track-album {
+    font-size: 11px;
+  }
+
+  .popular-track-duration {
     font-size: 12px;
   }
-  
-  .discography .album-card {
-    padding: 10px;
+
+  .artist-footer {
+    padding: 16px;
   }
-  
-  .album-card .play-hover {
-    right: 5px;
-    bottom: 75px;
-    width: 35px;
-    height: 35px;
-  }
-}
-
-.see-more-link {
-  color: var(--spotify-light-gray);
-  font-size: 14px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.see-more-link:hover {
-  color: white;
-}
-
-.related-artists {
-  padding: 0 32px;
-  margin-bottom: 32px;
-}
-
-.artist-card {
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: var(--spotify-dark-gray);
-  transition: background-color 0.3s;
-}
-
-.artist-card:hover {
-  background-color: var(--spotify-medium-gray);
-}
-
-.artist-card-img {
-  width: 100%;
-  height: auto;
-  border-radius: 50%;
-  padding: 10%;
-}
-
-.artist-card-name {
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.artist-card-type {
-  font-size: 14px;
-  color: var(--spotify-light-gray);
 }

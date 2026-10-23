@@ -1,0 +1,11 @@
+{
+  "name": "spotify-clone-team1",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Clone didattico di Spotify in HTML, CSS e JavaScript vanilla",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "check": "node scripts/check.js"
+  },
+  "license": "MIT"
+}

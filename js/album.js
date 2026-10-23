@@ -1,345 +1,242 @@
 // ===================================================
-// INITIALIZATION AND EVENT LISTENERS
+// PAGINA ALBUM
 // ===================================================
-document.addEventListener('DOMContentLoaded', function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const albumId = urlParams.get('id');
+// Header, azioni, tracklist e footer di un album.
+// ===================================================
 
-  if (albumId) {
-    fetchAlbumDetails(albumId);
-  } else {
-    document.getElementById('album-details-container').innerHTML = `
-      <div class="alert alert-danger">
-        Nessun ID album specificato nell'URL.
-      </div>
-    `;
+(function () {
+  'use strict';
+
+  const U = window.AppUtils;
+  const MusicApi = window.MusicApi;
+  const Library = window.AppLibrary;
+
+  let currentAlbum = null;
+
+  function getAlbumId() {
+    return new URLSearchParams(window.location.search).get('id');
   }
 
-  setupSearch();
-});
+  function loadAlbum(albumId) {
+    const container = document.getElementById('album-details-container');
+    if (!container) return;
 
-// ===================================================
-// ALBUM DATA FETCHING
-// ===================================================
+    U.showSpinner(container);
 
-function fetchAlbumDetails(albumId) {
-  const apiUrl = `https://striveschool-api.herokuapp.com/api/deezer/album/${albumId}`;
-
-  fetch(apiUrl)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      displayAlbumDetails(data);
-    })
-    .catch(error => {
-      console.error('Error fetching album details:', error);
-      document.getElementById('album-details-container').innerHTML = `
-        <div class="alert alert-danger">
-          Errore nel caricamento dei dettagli dell'album: ${error.message}
-        </div>
-      `;
-    });
-}
-
-// ===================================================
-// ALBUM UI RENDERING
-// ===================================================
-
-function displayAlbumDetails(album) {
-  if (!album) {
-    console.error("No album data available");
-    return;
-  }
-
-  const albumDetailsContainer = document.getElementById('album-details-container');
-
-  const releaseDate = new Date(album.release_date);
-  const year = releaseDate.getFullYear();
-
-  const totalDurationSeconds = album.tracks.data.reduce((acc, track) => acc + track.duration, 0);
-  const totalMinutes = Math.floor(totalDurationSeconds / 60);
-  const totalSeconds = totalDurationSeconds % 60;
-
-  albumDetailsContainer.innerHTML = `
-    <div class="album-header">
-      <img src="${album.cover_medium}" alt="${album.title}" class="album-cover-lg">
-      <div class="album-info">
-        <div class="album-type">ALBUM</div>
-        <h1 class="album-title">${album.title}</h1>
-        <div class="album-details">
-          <img src="${album.artist.picture_small}" alt="${album.artist.name}" class="rounded-circle me-2" width="24" height="24">
-          <span><a href="artist.html?id=${album.artist.id}" class="text-white text-decoration-none">${album.artist.name}</a> • ${year} • ${album.tracks.data.length} brani, ${totalMinutes}:${totalSeconds < 10 ? '0' + totalSeconds : totalSeconds}</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="album-actions p-4">
-      <button class="btn btn-success rounded-pill btn-play" id="album-play-btn"><i class="bi bi-play-fill"></i> Play</button>
-      <button class="btn btn-outline-light rounded-pill btn-save"><i class="bi bi-heart"></i> Salva</button>
-      <button class="btn btn-link text-white"><i class="bi bi-three-dots"></i></button>
-    </div>
-
-    <div class="track-list">
-      <div class="track-list-header">
-        <div class="track-number">#</div>
-        <div>TITOLO</div>
-        <div class="track-duration d-none d-sm-block"><i class="bi bi-clock"></i></div>
-      </div>
-
-      ${album.tracks.data.map((track, index) => {
-        const minutes = Math.floor(track.duration / 60);
-        const seconds = track.duration % 60;
-        return `
-          <div class="track-list-row" data-preview-url="${track.preview}" data-track-id="${track.id}">
-            <div class="track-number">${index + 1}</div>
-            <div class="track-title">${track.title}</div>
-            <div class="track-artist">${track.artist.name}</div>
-            <div class="track-duration d-none d-sm-block">${minutes}:${seconds < 10 ? '0' + seconds : seconds}</div>
-          </div>
-        `;
-      }).join('')}
-    </div>
-
-    <div class="album-footer p-4">
-      <div class="release-date">
-        <p class="text-white-50 small">${releaseDate.toLocaleDateString()}</p>
-      </div>
-      <div class="copyright">
-        <p class="text-white-50 small">${album.copyright}</p>
-      </div>
-    </div>
-  `;
-
-  const albumPlayBtn = document.getElementById('album-play-btn');
-  if (albumPlayBtn && window.musicPlayer) {
-    albumPlayBtn.addEventListener('click', function() {
-      const firstTrack = album.tracks.data[0];
-      if (firstTrack && firstTrack.preview) {
-        const playlist = album.tracks.data.map(track => {
-          return {
-            title: track.title,
-            preview: track.preview,
-            artist: {
-              name: track.artist.name,
-              id: track.artist.id
-            },
-            album: {
-              cover_small: album.cover_small
-            },
-            duration: track.duration
-          };
-        });
-        
-        window.musicPlayer.setPlaylist(playlist);
-        
-        const trackInfo = {
-          title: firstTrack.title,
-          artist: {
-            name: firstTrack.artist.name,
-            id: firstTrack.artist.id
-          },
-          album: {
-            cover_small: album.cover_small
-          },
-          duration: firstTrack.duration
-        };
-        window.musicPlayer.play(firstTrack.preview, trackInfo);
-
-        const icon = this.querySelector('i');
-        if (icon && icon.classList.contains('bi-play-fill')) {
-          icon.classList.remove('bi-play-fill');
-          icon.classList.add('bi-pause-fill');
-        }
-        
-        if (window.musicPlayer) {
-          const audioPlayer = document.querySelector('audio');
-          if (audioPlayer) {
-            audioPlayer.addEventListener('ended', function() {
-              window.musicPlayer.playNext();
-            });
-          }
-        }
-      }
-    });
-  }
-
-  document.querySelectorAll('.track-list-row').forEach((row, index) => {
-    row.addEventListener('click', function() {
-      const trackId = this.dataset.trackId;
-      const previewUrl = this.dataset.previewUrl;
-      if (previewUrl && window.musicPlayer) {
-        const playlist = album.tracks.data.map(track => {
-          return {
-            title: track.title,
-            preview: track.preview,
-            artist: {
-              name: track.artist.name,
-              id: track.artist.id
-            },
-            album: {
-              cover_small: album.cover_small
-            },
-            duration: track.duration
-          };
-        });
-        
-        window.musicPlayer.setPlaylist(playlist);
-        
-        const track = album.tracks.data[index];
-        const trackInfo = {
-          title: track.title,
-          artist: {
-            name: track.artist.name,
-            id: track.artist.id
-          },
-          album: {
-            cover_small: album.cover_small
-          },
-          duration: track.duration
-        };
-        window.musicPlayer.play(previewUrl, trackInfo);
-      }
-    });
-
-    row.style.cursor = 'pointer';
-  });
-}
-
-// ===================================================
-// PLAYER BAR UPDATES
-// ===================================================
-
-function updatePlayerBar(track, album) {
-  const currentAlbumImg = document.querySelector('.current-album-img');
-  const trackNameElement = document.querySelector('.track-name');
-  const artistNameElement = document.querySelector('.artist-name');
-
-  if (currentAlbumImg) currentAlbumImg.src = album.cover_small;
-  if (trackNameElement) trackNameElement.textContent = track.title;
-  if (artistNameElement) {
-    artistNameElement.innerHTML = `
-      <a href="artist.html?id=${track.artist.id}" class="text-white-50">${track.artist.name}</a>
-    `;
-  }
-
-  const totalTimeElement = document.querySelector('.total-time');
-  if (totalTimeElement && track.duration) {
-    const minutes = Math.floor(track.duration / 60);
-    const seconds = track.duration % 60;
-    totalTimeElement.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-  }
-}
-
-// ===================================================
-// SEARCH FUNCTIONALITY
-// ===================================================
-
-function setupSearch() {
-  const searchLink = document.getElementById('search-link');
-  const searchBox = document.getElementById('search-box');
-  const searchInput = document.getElementById('search-input');
-
-  const mobileSearchLink = document.getElementById('mobile-search-link');
-  const mobileSearchBox = document.getElementById('mobile-search-box');
-  const mobileSearchInput = document.getElementById('mobile-search-input');
-  const mobileSearchButton = document.getElementById('mobile-search-button');
-
-  if (searchLink && searchBox && searchInput) {
-    searchLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      if (searchBox.style.display === 'none' || searchBox.style.display === '') {
-        searchBox.style.display = 'block';
-        searchInput.focus();
-      } else {
-        searchBox.style.display = 'none';
-      }
-    });
-
-    searchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        const query = e.target.value.trim();
-        if (query) {
-          window.location.href = `index.html?search=${encodeURIComponent(query)}`;
-        }
-      }
-    });
-  }
-
-  if (mobileSearchLink && mobileSearchBox && mobileSearchInput) {
-    if (window.innerWidth < 992) {
-      mobileSearchLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location.href = 'search.html';
+    MusicApi.getAlbum(albumId)
+      .then(function (album) {
+        if (!album || !album.id) throw new Error('Album non trovato');
+        currentAlbum = album;
+        renderAlbum(album);
+      })
+      .catch(function (error) {
+        console.error('Errore dettagli album:', error);
+        U.showError(container, 'Errore nel caricamento dell\'album: ' + error.message);
       });
+  }
+
+  // ---------------------------------------------------
+  // TRACKLIST
+  // ---------------------------------------------------
+
+  function trackRowMarkup(track, index) {
+    return (
+      '<div class="track-list-row" role="button" tabindex="0"' +
+        ' data-preview-url="' + U.escapeHtml(track.streamUrl) + '"' +
+        ' data-track-id="' + U.escapeHtml(track.id) + '"' +
+        ' data-track-index="' + index + '"' +
+        ' aria-label="Riproduci ' + U.escapeHtml(track.title) + '">' +
+        '<div class="track-number">' + (index + 1) + '</div>' +
+        '<div class="track-main">' +
+          '<span class="track-title">' + U.escapeHtml(track.title) + '</span>' +
+          '<span class="track-artist">' + U.escapeHtml(track.artist.name) + '</span>' +
+        '</div>' +
+        '<button type="button" class="track-add" data-track-index="' + index + '" aria-label="Aggiungi ' + U.escapeHtml(track.title) + ' a una playlist">' +
+          '<i class="bi bi-plus-circle"></i>' +
+        '</button>' +
+        '<div class="track-duration">' + U.formatTime(track.duration) + '</div>' +
+      '</div>'
+    );
+  }
+
+  // ---------------------------------------------------
+  // RENDER
+  // ---------------------------------------------------
+
+  function renderAlbum(album) {
+    const container = document.getElementById('album-details-container');
+    if (!container) return;
+
+    const tracks = album.tracks || [];
+    const totalSeconds = Library.durationOfTracks(tracks);
+    const totalDuration = totalSeconds ? Math.round(totalSeconds / 60) + ' min' : '';
+    const year = album.year || '';
+
+    const metaParts = [];
+    if (album.artist.id) {
+      metaParts.push(
+        '<a href="' + U.escapeHtml(U.pageUrl('artist.html', { id: album.artist.id })) + '" class="text-white text-decoration-none album-artist-link">' +
+          U.escapeHtml(album.artist.name) +
+        '</a>'
+      );
     } else {
-      mobileSearchLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (mobileSearchBox.style.display === 'none' || mobileSearchBox.style.display === '') {
-          mobileSearchBox.style.display = 'block';
-          mobileSearchInput.focus();
-        } else {
-          mobileSearchBox.style.display = 'none';
+      metaParts.push(U.escapeHtml(album.artist.name));
+    }
+    if (year) metaParts.push(U.escapeHtml(year));
+    metaParts.push(tracks.length + (tracks.length === 1 ? ' brano' : ' brani'));
+    if (totalDuration) metaParts.push(totalDuration);
+
+    container.innerHTML =
+      '<div class="album-header">' +
+        '<img src="' + U.escapeHtml(album.cover) + '" alt="Copertina di ' + U.escapeHtml(album.title) + '" class="album-cover-lg">' +
+        '<div class="album-info">' +
+          '<div class="album-type">ALBUM</div>' +
+          '<h1 class="album-title">' + U.escapeHtml(album.title) + '</h1>' +
+          '<div class="album-details">' +
+            (album.artistPicture
+              ? '<img src="' + U.escapeHtml(album.artistPicture) + '" alt="" class="album-artist-img" loading="lazy">'
+              : '') +
+            '<span>' + metaParts.join(' <span class="meta-dot">&bull;</span> ') + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="album-actions">' +
+        '<button type="button" class="btn btn-success rounded-pill btn-play" id="album-play-btn"' +
+          (tracks.length ? '' : ' disabled') + '>' +
+          '<i class="bi bi-play-fill"></i> Play' +
+        '</button>' +
+        '<button type="button" class="btn btn-outline-light rounded-pill btn-save" id="album-save-btn" aria-pressed="false">' +
+          '<i class="bi bi-heart"></i> Salva' +
+        '</button>' +
+      '</div>' +
+
+      '<div class="track-list">' +
+        '<div class="track-list-header">' +
+          '<div class="track-number">#</div>' +
+          '<div>TITOLO</div>' +
+          '<div class="track-add-spacer"></div>' +
+          '<div class="track-duration"><i class="bi bi-clock" aria-hidden="true"></i></div>' +
+        '</div>' +
+        (tracks.length
+          ? tracks.map(trackRowMarkup).join('')
+          : '<p class="empty-state p-3">Nessun brano disponibile per questo album.</p>') +
+      '</div>' +
+
+      '<div class="album-footer">' +
+        (album.releaseDate
+          ? '<p class="text-white-50 small mb-1">' + U.escapeHtml(new Date(album.releaseDate).toLocaleDateString('it-IT')) + '</p>'
+          : '') +
+        (album.copyright
+          ? '<p class="text-white-50 small mb-0">' + U.escapeHtml(album.copyright) + '</p>'
+          : '') +
+      '</div>';
+
+    document.title = album.title + ' - Spotify Clone';
+    bindAlbumEvents(album, tracks);
+    syncSaveButton(album);
+  }
+
+  // ---------------------------------------------------
+  // AZIONI
+  // ---------------------------------------------------
+
+  function syncSaveButton(album) {
+    const button = document.getElementById('album-save-btn');
+    if (!button) return;
+
+    const saved = Library.isAlbumSaved(album.id);
+
+    button.classList.toggle('is-saved', saved);
+    button.setAttribute('aria-pressed', saved ? 'true' : 'false');
+    button.innerHTML = '<i class="bi ' + (saved ? 'bi-check-lg' : 'bi-heart') + '"></i> ' + (saved ? 'Salvato' : 'Salva');
+  }
+
+  function bindAlbumEvents(album, tracks) {
+    const playButton = document.getElementById('album-play-btn');
+    if (playButton) {
+      playButton.addEventListener('click', function () {
+        window.musicPlayer.playFrom(tracks, 0);
+      });
+    }
+
+    const saveButton = document.getElementById('album-save-btn');
+    if (saveButton) {
+      saveButton.addEventListener('click', function () {
+        const saved = Library.toggleAlbum(album);
+        syncSaveButton(album);
+        if (window.AppLayout) {
+          window.AppLayout.showToast(saved ? 'Album salvato nella tua libreria' : 'Album rimosso dalla tua libreria');
         }
       });
     }
 
-    mobileSearchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        const query = e.target.value.trim();
-        if (query) {
-          if (window.innerWidth < 992) {
-            window.location.href = `search.html?search=${encodeURIComponent(query)}`;
-          } else {
-            window.location.href = `index.html?search=${encodeURIComponent(query)}`;
-          }
+    U.qsa('.track-list-row').forEach(function (row) {
+      function activate() {
+        const index = Number(row.getAttribute('data-track-index'));
+        const track = tracks[index];
+        if (!track || !track.streamUrl) {
+          if (window.AppLayout) window.AppLayout.showToast("Questo brano non ha un'anteprima disponibile");
+          return;
         }
+        window.musicPlayer.playFrom(tracks, index);
       }
+
+      row.addEventListener('click', function (event) {
+        if (event.target.closest('.track-add')) return;
+        activate();
+      });
+
+      row.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          activate();
+        }
+      });
     });
 
-    if (mobileSearchButton) {
-      mobileSearchButton.addEventListener('click', function() {
-        const query = mobileSearchInput.value.trim();
-        if (query) {
-          if (window.innerWidth < 992) {
-            window.location.href = `search.html?search=${encodeURIComponent(query)}`;
-          } else {
-            window.location.href = `index.html?search=${encodeURIComponent(query)}`;
-          }
+    U.qsa('.track-add').forEach(function (button) {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const index = Number(button.getAttribute('data-track-index'));
+        const track = tracks[index];
+        if (track && window.AppLayout) {
+          window.AppLayout.openAddToPlaylist(track);
         }
       });
-    }
+    });
   }
-}
 
-// ===================================================
-// INITIALIZATION
-// ===================================================
+  // ---------------------------------------------------
+  // AVVIO
+  // ---------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const albumId = urlParams.get('id');
+  function init() {
+    const container = document.getElementById('album-details-container');
+    if (!container) return;
 
-  if (albumId) {
-    fetchAlbumDetails(albumId);
-    fetchPlayerBarTrack();
+    const albumId = getAlbumId();
+    if (!albumId) {
+      U.showError(container, 'Nessun album specificato: torna alla home e scegli un album.');
+      return;
+    }
+
+    loadAlbum(albumId);
+    document.addEventListener('library:changed', function (event) {
+      if (currentAlbum && (!event.detail || event.detail.key === Library.KEYS.albums)) {
+        syncSaveButton(currentAlbum);
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    showError("Album ID not found in URL");
+    init();
   }
-});
 
-// ===================================================
-// UTILITY FUNCTIONS
-// ===================================================
-
-function showError(message) {
-    const errorContainer = document.getElementById('error-container');
-    if (errorContainer) {
-        errorContainer.textContent = message;
-    } else {
-        console.error('Error container not found:', message);
-    }
-}
+  window.albumPage = {
+    getAlbum: function () { return currentAlbum; }
+  };
+})();
