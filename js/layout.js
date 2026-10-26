@@ -350,6 +350,34 @@
     placeholder.outerHTML = html;
   }
 
+  function mountMobileSourceBar() {
+    const main = document.querySelector('.main-content');
+    if (!main || document.querySelector('.mobile-source-bar')) return;
+    if (document.body.getAttribute('data-page') === 'library') return;
+
+    const info = window.MusicApi
+      ? window.MusicApi.getProviderInfo()
+      : { label: 'Deezer', badge: 'Anteprima 30s', supportsFullTracks: false };
+
+    const bar = document.createElement('button');
+    bar.type = 'button';
+    bar.id = 'mobile-source-bar';
+    bar.className = 'mobile-source-bar d-lg-none';
+    bar.innerHTML =
+      '<i class="bi bi-sliders" aria-hidden="true"></i>' +
+      '<span>Sorgente: ' + U.escapeHtml(info.label) + '</span>' +
+      '<span class="mobile-source-badge' + (info.supportsFullTracks ? ' is-full' : '') + '">' +
+        U.escapeHtml(info.badge) +
+      '</span>';
+
+    const header = main.querySelector('#app-header');
+    if (header) {
+      header.insertAdjacentElement('afterend', bar);
+    } else {
+      main.prepend(bar);
+    }
+  }
+
   function mountLayout() {
     mount('app-sidebar', sidebarTemplate());
     mount('app-header', headerTemplate());
@@ -365,6 +393,7 @@
     }
 
     document.body.insertAdjacentHTML('beforeend', modalsTemplate());
+    mountMobileSourceBar();
   }
 
   // ---------------------------------------------------
@@ -575,6 +604,33 @@
     openModal(document.getElementById('provider-modal'));
   }
 
+  function applyProviderSelection() {
+    const selected = document.querySelector('input[name="music-provider"]:checked');
+    if (!selected || !window.MusicApi) return;
+
+    if (selected.value === window.MusicApi.getProvider()) {
+      closeAllModals();
+      return;
+    }
+
+    window.MusicApi.setProvider(selected.value);
+    if (window.musicPlayer && window.musicPlayer.clear) {
+      window.musicPlayer.clear();
+    }
+
+    const page = document.body.getAttribute('data-page');
+    if (page === 'album' || page === 'artist') {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    // Rimuoviamo ?provider= dall'URL, altrimenti al reload
+    // sovrascriverebbe la scelta appena salvata.
+    const url = new URL(window.location.href);
+    url.searchParams.delete('provider');
+    window.location.replace(url.pathname + url.search);
+  }
+
   function initModals() {
     const confirmAccept = document.getElementById('confirm-accept');
     if (confirmAccept) {
@@ -603,6 +659,18 @@
       if (event.target.closest('#provider-settings-link')) {
         event.preventDefault();
         openProviderSettings();
+        return;
+      }
+
+      if (event.target.closest('#mobile-source-bar')) {
+        event.preventDefault();
+        openProviderSettings();
+        return;
+      }
+
+      if (event.target.closest('#provider-apply')) {
+        event.preventDefault();
+        applyProviderSelection();
         return;
       }
 
@@ -639,32 +707,6 @@
         closeAllModals();
         renderPlaylistNav();
         showToast('Playlist "' + playlist.name + '" creata');
-      });
-    }
-
-    // Applica il provider musicale.
-    const providerApply = document.getElementById('provider-apply');
-    if (providerApply) {
-      providerApply.addEventListener('click', function () {
-        const selected = document.querySelector('input[name="music-provider"]:checked');
-        if (!selected || !window.MusicApi) return;
-
-        if (selected.value === window.MusicApi.getProvider()) {
-          closeAllModals();
-          return;
-        }
-
-        window.MusicApi.setProvider(selected.value);
-        if (window.musicPlayer && window.musicPlayer.clear) {
-          window.musicPlayer.clear();
-        }
-
-        const page = document.body.getAttribute('data-page');
-        if (page === 'album' || page === 'artist') {
-          window.location.href = 'index.html';
-        } else {
-          window.location.reload();
-        }
       });
     }
 
