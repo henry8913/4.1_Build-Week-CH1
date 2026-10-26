@@ -10,7 +10,7 @@ Un clone di Spotify interamente client-side: catalogo musicale, album, artisti, 
 
 ## 📋 Descrizione
 
-Il progetto replica l'esperienza di Spotify con HTML, CSS e JavaScript vanilla, senza framework applicativi né build step. Bootstrap gestisce griglia e componenti, mentre i dati arrivano da un adattatore API isolato in un unico file: oggi usa Deezer tramite il proxy didattico di Strive School, domani può usare qualsiasi provider senza toccare le pagine.
+Il progetto replica l'esperienza di Spotify con HTML, CSS e JavaScript vanilla, senza framework applicativi né build step. Bootstrap gestisce griglia e componenti, mentre i dati arrivano da un adattatore API isolato in un unico file: oggi supporta Audius (brani completi) e Deezer (anteprime tramite il proxy didattico di Strive School), domani può usare qualsiasi provider senza toccare le pagine.
 
 Tutto ciò che riguarda la libreria personale (brani che ti piacciono, album salvati, artisti seguiti, playlist) viene salvato in `localStorage`.
 
@@ -36,7 +36,7 @@ Tutto ciò che riguarda la libreria personale (brani che ti piacciono, album sal
 - **Brani che ti piacciono**: pagina dedicata con play, rimozione e durata totale
 - **La tua libreria**: playlist, album salvati e artisti seguiti
 - **Playlist personali**: creazione, aggiunta e rimozione brani, eliminazione
-- **Doppio provider**: Deezer per il catalogo mainstream con anteprime, Audius per brani completi
+- **Doppio provider**: Audius per i brani completi (predefinito) e Deezer per il catalogo mainstream con anteprime
 - Badge nel player: **Anteprima 30s** oppure **Brano completo**
 - Aggiunta del brano corrente a una playlist dal player o dalle tracce di un album
 - Riproduzione che continua quando si cambia pagina
@@ -78,14 +78,14 @@ npm run check
 
 ## 🔌 Provider musicale
 
-L'app supporta due provider intercambiabili, selezionabili da **Sorgente** nella sidebar (desktop), dalla voce **Sorgente** nella barra inferiore (mobile) o dalla pagina **La tua libreria**:
+L'app supporta due provider intercambiabili, selezionabili da **Sorgente: provider** nella sidebar (desktop), da **Impostazioni** nella barra inferiore (mobile) o dalla pagina **La tua libreria**:
 
 | Provider | Brani | Catalogo | Chiave API |
 |---|---|---|---|
-| **Deezer** (default) | Anteprime da 30 secondi | Mainstream | Nessuna (proxy didattico) |
-| **Audius** | **Brani completi** | Indipendente: elettronica, lofi, hip-hop, house, remix | Nessuna |
+| **Audius** (default) | **Brani completi** | Indipendente: elettronica, lofi, hip-hop, house, remix | Nessuna |
+| **Deezer** | Anteprime da 30 secondi | Mainstream | Nessuna (proxy didattico) |
 
-La scelta viene salvata in `localStorage` e il player mostra un badge **Anteprima 30s** oppure **Brano completo**. I brani salvati nei preferiti restano riproducibili anche dopo aver cambiato provider, perché ogni traccia conserva il proprio provider.
+Alla prima apertura l'app parte con **Audius** e i brani completi. La scelta viene salvata in `localStorage` e il player mostra un badge **Anteprima 30s** oppure **Brano completo**. I brani salvati nei preferiti restano riproducibili anche dopo aver cambiato provider, perché ogni traccia conserva il proprio provider.
 
 ### Aggiungere un altro provider
 

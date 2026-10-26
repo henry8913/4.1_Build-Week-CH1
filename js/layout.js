@@ -163,6 +163,10 @@
   }
 
   function playerTemplate() {
+    const sourceInfo = window.MusicApi ? window.MusicApi.getProviderInfo() : null;
+    const sourceClass = sourceInfo && sourceInfo.supportsFullTracks ? ' has-full-source' : '';
+    const sourceLabel = sourceInfo ? sourceInfo.label : 'Deezer';
+
     return (
       '<div class="player-bar" id="player-bar">' +
         '<div class="container-fluid d-none d-lg-block player-desktop">' +
@@ -259,8 +263,8 @@
           '<a class="mobile-nav-item" data-nav="library" href="library.html">' +
             '<i class="bi bi-collection"></i><span>Libreria</span>' +
           '</a>' +
-          '<button type="button" class="mobile-nav-item mobile-nav-button" id="mobile-provider-nav" aria-label="Cambia sorgente musicale">' +
-            '<i class="bi bi-sliders"></i><span>Sorgente</span>' +
+          '<button type="button" class="mobile-nav-item mobile-nav-button' + sourceClass + '" id="mobile-provider-nav" aria-label="Impostazioni, sorgente attuale ' + U.escapeHtml(sourceLabel) + '">' +
+            '<i class="bi bi-sliders"></i><span>Impostazioni</span>' +
           '</button>' +
         '</nav>' +
       '</div>'
@@ -327,12 +331,13 @@
         '<div class="app-modal-backdrop" data-close-modal></div>' +
         '<div class="app-modal-panel" role="dialog" aria-modal="true" aria-labelledby="provider-modal-title">' +
           '<div class="app-modal-header">' +
-            '<h2 id="provider-modal-title">Sorgente musicale</h2>' +
+            '<h2 id="provider-modal-title">Impostazioni</h2>' +
             '<button type="button" class="btn btn-link text-white" data-close-modal aria-label="Chiudi">' +
               '<i class="bi bi-x-lg"></i>' +
             '</button>' +
           '</div>' +
-          '<p class="app-modal-subtitle">Scegli da dove arrivano brani e copertine. Il cambio ricarica la pagina.</p>' +
+          '<p class="app-modal-subtitle">Scegli la sorgente musicale. Il cambio ricarica la pagina.</p>' +
+          '<p class="settings-section-label">Sorgente musicale</p>' +
           '<div class="provider-options" id="provider-options"></div>' +
           '<div class="app-modal-actions">' +
             '<button type="button" class="btn btn-dark" data-close-modal>Annulla</button>' +
@@ -351,6 +356,17 @@
     const placeholder = document.getElementById(id);
     if (!placeholder) return;
     placeholder.outerHTML = html;
+  }
+
+  function initImageFallback() {
+    document.addEventListener('error', function (event) {
+      const image = event.target;
+      if (!image || image.tagName !== 'IMG') return;
+      if (image.dataset.fallbackApplied) return;
+
+      image.dataset.fallbackApplied = '1';
+      image.src = 'img/cover_c.jpg';
+    }, true);
   }
 
   function mountLayout() {
@@ -717,6 +733,7 @@
   initNavigation();
   initSoonLinks();
   initModals();
+  initImageFallback();
 
   document.addEventListener('library:changed', function (event) {
     if (!event.detail || event.detail.key === Library.KEYS.playlists) renderPlaylistNav();

@@ -16,7 +16,7 @@
 
   const DEFAULT_COVER = 'img/cover_c.jpg';
   const STORAGE_KEY = 'provider';
-  const DEFAULT_PROVIDER = 'deezer';
+  const DEFAULT_PROVIDER = 'audius';
   const REQUEST_TIMEOUT = 12000;
 
   // ---------------------------------------------------

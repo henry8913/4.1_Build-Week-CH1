@@ -464,6 +464,10 @@
   color: #fff;
 }
 
+.mobile-nav-button.has-full-source i {
+  color: var(--spotify-green);
+}
+
 .mobile-nav-item.active i {
   color: var(--spotify-green);
 }
