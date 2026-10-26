@@ -78,7 +78,7 @@ npm run check
 
 ## 🔌 Provider musicale
 
-L'app supporta due provider intercambiabili, selezionabili da **Sorgente** nella sidebar (desktop), dalla barra in alto nella Home (mobile) o nella pagina **La tua libreria**:
+L'app supporta due provider intercambiabili, selezionabili da **Sorgente** nella sidebar (desktop), dalla voce **Sorgente** nella barra inferiore (mobile) o dalla pagina **La tua libreria**:
 
 | Provider | Brani | Catalogo | Chiave API |
 |---|---|---|---|

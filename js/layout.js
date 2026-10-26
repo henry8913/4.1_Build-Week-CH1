@@ -257,8 +257,11 @@
             '<i class="bi bi-search"></i><span>Cerca</span>' +
           '</a>' +
           '<a class="mobile-nav-item" data-nav="library" href="library.html">' +
-            '<i class="bi bi-collection"></i><span>La tua libreria</span>' +
+            '<i class="bi bi-collection"></i><span>Libreria</span>' +
           '</a>' +
+          '<button type="button" class="mobile-nav-item mobile-nav-button" id="mobile-provider-nav" aria-label="Cambia sorgente musicale">' +
+            '<i class="bi bi-sliders"></i><span>Sorgente</span>' +
+          '</button>' +
         '</nav>' +
       '</div>'
     );
@@ -350,34 +353,6 @@
     placeholder.outerHTML = html;
   }
 
-  function mountMobileSourceBar() {
-    const main = document.querySelector('.main-content');
-    if (!main || document.querySelector('.mobile-source-bar')) return;
-    if (document.body.getAttribute('data-page') === 'library') return;
-
-    const info = window.MusicApi
-      ? window.MusicApi.getProviderInfo()
-      : { label: 'Deezer', badge: 'Anteprima 30s', supportsFullTracks: false };
-
-    const bar = document.createElement('button');
-    bar.type = 'button';
-    bar.id = 'mobile-source-bar';
-    bar.className = 'mobile-source-bar d-lg-none';
-    bar.innerHTML =
-      '<i class="bi bi-sliders" aria-hidden="true"></i>' +
-      '<span>Sorgente: ' + U.escapeHtml(info.label) + '</span>' +
-      '<span class="mobile-source-badge' + (info.supportsFullTracks ? ' is-full' : '') + '">' +
-        U.escapeHtml(info.badge) +
-      '</span>';
-
-    const header = main.querySelector('#app-header');
-    if (header) {
-      header.insertAdjacentElement('afterend', bar);
-    } else {
-      main.prepend(bar);
-    }
-  }
-
   function mountLayout() {
     mount('app-sidebar', sidebarTemplate());
     mount('app-header', headerTemplate());
@@ -393,7 +368,6 @@
     }
 
     document.body.insertAdjacentHTML('beforeend', modalsTemplate());
-    mountMobileSourceBar();
   }
 
   // ---------------------------------------------------
@@ -662,7 +636,7 @@
         return;
       }
 
-      if (event.target.closest('#mobile-source-bar')) {
+      if (event.target.closest('#mobile-provider-nav')) {
         event.preventDefault();
         openProviderSettings();
         return;

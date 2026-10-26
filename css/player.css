@@ -452,6 +452,18 @@
   text-decoration: none;
 }
 
+.mobile-nav-button {
+  border: 0;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.mobile-nav-button:hover {
+  color: #fff;
+}
+
 .mobile-nav-item.active i {
   color: var(--spotify-green);
 }
