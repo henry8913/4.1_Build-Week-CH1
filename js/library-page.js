@@ -59,16 +59,27 @@
 
     const liked = Library.getLikedTracks();
     const playlists = Library.getPlaylists();
-    const albums = Library.getSavedAlbums();
-    const artists = Library.getFollowedArtists();
+    const providerId = window.MusicApi ? window.MusicApi.getProvider() : 'deezer';
+    const albums = Library.getSavedAlbums().filter(function (album) {
+      return (album.provider || 'deezer') === providerId;
+    });
+    const artists = Library.getFollowedArtists().filter(function (artist) {
+      return (artist.provider || 'deezer') === providerId;
+    });
+    const provider = window.MusicApi ? window.MusicApi.getProviderInfo().label : 'Deezer';
 
     container.innerHTML =
       '<div class="library-page">' +
         '<header class="library-header">' +
           '<h1>La tua libreria</h1>' +
-          '<button type="button" class="btn btn-outline-light library-create" id="library-create-playlist">' +
-            '<i class="bi bi-plus-lg"></i> Crea playlist' +
-          '</button>' +
+          '<div class="library-header-actions">' +
+            '<button type="button" class="btn btn-outline-light library-provider" id="library-provider">' +
+              '<i class="bi bi-sliders"></i> Sorgente: ' + U.escapeHtml(provider) +
+            '</button>' +
+            '<button type="button" class="btn btn-outline-light library-create" id="library-create-playlist">' +
+              '<i class="bi bi-plus-lg"></i> Crea playlist' +
+            '</button>' +
+          '</div>' +
         '</header>' +
 
         '<a class="liked-banner" href="liked.html">' +
@@ -112,6 +123,13 @@
     if (createButton) {
       createButton.addEventListener('click', function () {
         if (window.AppLayout) window.AppLayout.openCreatePlaylist(null);
+      });
+    }
+
+    const providerButton = document.getElementById('library-provider');
+    if (providerButton) {
+      providerButton.addEventListener('click', function () {
+        if (window.AppLayout) window.AppLayout.openProviderSettings();
       });
     }
 

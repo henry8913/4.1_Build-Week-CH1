@@ -269,11 +269,23 @@
   font-weight: 800;
 }
 
+.library-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.library-provider,
 .library-create {
   border-radius: 500px;
   padding: 9px 20px;
   font-size: 14px;
   font-weight: 700;
+}
+
+.library-provider {
+  color: var(--spotify-light-gray);
 }
 
 .liked-banner {

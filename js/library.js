@@ -77,7 +77,7 @@
       duration: Number(track.duration) || 0,
       streamUrl: track.streamUrl || track.preview || '',
       preview: track.streamUrl || track.preview || '',
-      provider: track.provider || 'deezer'
+      provider: track.provider || (window.MusicApi ? window.MusicApi.getProvider() : 'deezer')
     };
   }
 
@@ -93,7 +93,8 @@
         name: (album.artist && album.artist.name) || 'Artista sconosciuto'
       },
       year: album.year || '',
-      nbTracks: album.nbTracks || 0
+      nbTracks: album.nbTracks || 0,
+      provider: album.provider || (window.MusicApi ? window.MusicApi.getProvider() : 'deezer')
     };
   }
 
@@ -104,7 +105,8 @@
       name: artist.name || 'Artista sconosciuto',
       picture: artist.picture || artist.pictureMedium || '',
       pictureSmall: artist.pictureSmall || artist.pictureMedium || '',
-      fans: artist.fans || 0
+      fans: artist.fans || 0,
+      provider: artist.provider || (window.MusicApi ? window.MusicApi.getProvider() : 'deezer')
     };
   }
 

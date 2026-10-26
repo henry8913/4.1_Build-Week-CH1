@@ -760,6 +760,10 @@ a.card {
   margin-bottom: 0;
 }
 
+#provider-modal .app-modal-subtitle {
+  white-space: normal;
+}
+
 .app-modal-header {
   display: flex;
   align-items: center;
@@ -850,6 +854,82 @@ a.card {
 
 .add-playlist-meta .bi-check-lg {
   color: var(--spotify-green);
+}
+
+/* ---------------------------------------------------
+   SELEZIONE PROVIDER
+   --------------------------------------------------- */
+
+.provider-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-section-label {
+  margin: 4px 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #8c8c8c;
+}
+
+.provider-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #2e2e2e;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.provider-option:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.provider-option.is-current {
+  border-color: var(--spotify-green);
+}
+
+.provider-option input {
+  accent-color: var(--spotify-green);
+  flex: 0 0 auto;
+}
+
+.provider-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.provider-option-text strong {
+  font-size: 14px;
+}
+
+.provider-option-text small {
+  color: var(--spotify-light-gray);
+  font-size: 12px;
+}
+
+.provider-option-badge {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--spotify-light-gray);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.provider-option-badge.is-full {
+  background-color: var(--spotify-green);
+  color: #08210f;
 }
 
 /* ---------------------------------------------------

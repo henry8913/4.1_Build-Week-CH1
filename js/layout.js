@@ -78,6 +78,13 @@
             '<li class="nav-item">' +
               '<a class="nav-link" href="library.html#episodes"><i class="bi bi-bookmark-fill"></i> I tuoi episodi</a>' +
             '</li>' +
+            '<li class="nav-item">' +
+              '<button type="button" class="nav-link nav-button" id="provider-settings-link">' +
+                '<i class="bi bi-sliders"></i> <span id="provider-settings-label">Sorgente: ' +
+                  U.escapeHtml(window.MusicApi ? window.MusicApi.getProviderInfo().label : 'Deezer') +
+                '</span>' +
+              '</button>' +
+            '</li>' +
           '</ul>' +
 
           '<div class="sidebar-divider"></div>' +
@@ -156,6 +163,10 @@
   }
 
   function playerTemplate() {
+    const sourceInfo = window.MusicApi ? window.MusicApi.getProviderInfo() : null;
+    const sourceClass = sourceInfo && sourceInfo.supportsFullTracks ? ' has-full-source' : '';
+    const sourceLabel = sourceInfo ? sourceInfo.label : 'Deezer';
+
     return (
       '<div class="player-bar" id="player-bar">' +
         '<div class="container-fluid d-none d-lg-block player-desktop">' +
@@ -166,6 +177,7 @@
                 '<div class="track-info ms-2">' +
                   '<div class="track-name">Nessun brano</div>' +
                   '<div class="artist-name">Seleziona un brano</div>' +
+                  '<div class="source-badge" id="source-badge">Anteprima 30s</div>' +
                 '</div>' +
                 '<button type="button" class="btn btn-link text-white ms-2 like-btn" aria-label="Salva brano nei preferiti" aria-pressed="false">' +
                   '<i class="bi bi-heart"></i>' +
@@ -249,8 +261,11 @@
             '<i class="bi bi-search"></i><span>Cerca</span>' +
           '</a>' +
           '<a class="mobile-nav-item" data-nav="library" href="library.html">' +
-            '<i class="bi bi-collection"></i><span>La tua libreria</span>' +
+            '<i class="bi bi-collection"></i><span>Libreria</span>' +
           '</a>' +
+          '<button type="button" class="mobile-nav-item mobile-nav-button' + sourceClass + '" id="mobile-provider-nav" aria-label="Impostazioni, sorgente attuale ' + U.escapeHtml(sourceLabel) + '">' +
+            '<i class="bi bi-sliders"></i><span>Impostazioni</span>' +
+          '</button>' +
         '</nav>' +
       '</div>'
     );
@@ -310,6 +325,25 @@
             '<button type="button" class="btn btn-danger" id="confirm-accept">Elimina</button>' +
           '</div>' +
         '</div>' +
+      '</div>' +
+
+      '<div class="app-modal" id="provider-modal" aria-hidden="true">' +
+        '<div class="app-modal-backdrop" data-close-modal></div>' +
+        '<div class="app-modal-panel" role="dialog" aria-modal="true" aria-labelledby="provider-modal-title">' +
+          '<div class="app-modal-header">' +
+            '<h2 id="provider-modal-title">Impostazioni</h2>' +
+            '<button type="button" class="btn btn-link text-white" data-close-modal aria-label="Chiudi">' +
+              '<i class="bi bi-x-lg"></i>' +
+            '</button>' +
+          '</div>' +
+          '<p class="app-modal-subtitle">Scegli la sorgente musicale. Il cambio ricarica la pagina.</p>' +
+          '<p class="settings-section-label">Sorgente musicale</p>' +
+          '<div class="provider-options" id="provider-options"></div>' +
+          '<div class="app-modal-actions">' +
+            '<button type="button" class="btn btn-dark" data-close-modal>Annulla</button>' +
+            '<button type="button" class="btn btn-success" id="provider-apply">Applica</button>' +
+          '</div>' +
+        '</div>' +
       '</div>'
     );
   }
@@ -322,6 +356,17 @@
     const placeholder = document.getElementById(id);
     if (!placeholder) return;
     placeholder.outerHTML = html;
+  }
+
+  function initImageFallback() {
+    document.addEventListener('error', function (event) {
+      const image = event.target;
+      if (!image || image.tagName !== 'IMG') return;
+      if (image.dataset.fallbackApplied) return;
+
+      image.dataset.fallbackApplied = '1';
+      image.src = 'img/cover_c.jpg';
+    }, true);
   }
 
   function mountLayout() {
@@ -512,6 +557,70 @@
     openModal(modal);
   }
 
+  function openProviderSettings() {
+    if (!window.MusicApi) return;
+
+    const container = document.getElementById('provider-options');
+    const current = window.MusicApi.getProvider();
+
+    if (container) {
+      container.innerHTML = window.MusicApi.listProviders().map(function (provider) {
+        const checked = provider.id === current;
+
+        return (
+          '<label class="provider-option' + (checked ? ' is-current' : '') + '">' +
+            '<input type="radio" name="music-provider" value="' + U.escapeHtml(provider.id) + '"' +
+              (checked ? ' checked' : '') + '>' +
+            '<span class="provider-option-text">' +
+              '<strong>' + U.escapeHtml(provider.label) + '</strong>' +
+              '<small>' + U.escapeHtml(provider.description) + '</small>' +
+            '</span>' +
+            '<span class="provider-option-badge' + (provider.supportsFullTracks ? ' is-full' : '') + '">' +
+              (provider.supportsFullTracks ? 'Brani completi' : 'Anteprime 30s') +
+            '</span>' +
+          '</label>'
+        );
+      }).join('');
+
+      container.onchange = function (event) {
+        if (!event.target || event.target.name !== 'music-provider') return;
+        U.qsa('.provider-option', container).forEach(function (option) {
+          const input = option.querySelector('input');
+          option.classList.toggle('is-current', !!(input && input.checked));
+        });
+      };
+    }
+
+    openModal(document.getElementById('provider-modal'));
+  }
+
+  function applyProviderSelection() {
+    const selected = document.querySelector('input[name="music-provider"]:checked');
+    if (!selected || !window.MusicApi) return;
+
+    if (selected.value === window.MusicApi.getProvider()) {
+      closeAllModals();
+      return;
+    }
+
+    window.MusicApi.setProvider(selected.value);
+    if (window.musicPlayer && window.musicPlayer.clear) {
+      window.musicPlayer.clear();
+    }
+
+    const page = document.body.getAttribute('data-page');
+    if (page === 'album' || page === 'artist') {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    // Rimuoviamo ?provider= dall'URL, altrimenti al reload
+    // sovrascriverebbe la scelta appena salvata.
+    const url = new URL(window.location.href);
+    url.searchParams.delete('provider');
+    window.location.replace(url.pathname + url.search);
+  }
+
   function initModals() {
     const confirmAccept = document.getElementById('confirm-accept');
     if (confirmAccept) {
@@ -537,6 +646,24 @@
         return;
       }
 
+      if (event.target.closest('#provider-settings-link')) {
+        event.preventDefault();
+        openProviderSettings();
+        return;
+      }
+
+      if (event.target.closest('#mobile-provider-nav')) {
+        event.preventDefault();
+        openProviderSettings();
+        return;
+      }
+
+      if (event.target.closest('#provider-apply')) {
+        event.preventDefault();
+        applyProviderSelection();
+        return;
+      }
+
       if (event.target.closest('#add-new-playlist')) {
         event.preventDefault();
         const track = pendingTrackForPlaylist;
@@ -550,8 +677,7 @@
     });
 
     // Form creazione playlist.
-    const form = document.getElementById('create-playlist-form');
-    if (form) {
+    const form = document.getElementById('create-playlist-form');    if (form) {
       form.addEventListener('submit', function (event) {
         event.preventDefault();
         const input = document.getElementById('create-playlist-name');
@@ -607,6 +733,7 @@
   initNavigation();
   initSoonLinks();
   initModals();
+  initImageFallback();
 
   document.addEventListener('library:changed', function (event) {
     if (!event.detail || event.detail.key === Library.KEYS.playlists) renderPlaylistNav();
@@ -617,6 +744,7 @@
     showToast: showToast,
     openCreatePlaylist: openCreatePlaylist,
     openAddToPlaylist: openAddToPlaylist,
+    openProviderSettings: openProviderSettings,
     confirm: openConfirm,
     closeAllModals: closeAllModals
   };

@@ -10,7 +10,7 @@ Un clone di Spotify interamente client-side: catalogo musicale, album, artisti, 
 
 ## 📋 Descrizione
 
-Il progetto replica l'esperienza di Spotify con HTML, CSS e JavaScript vanilla, senza framework applicativi né build step. Bootstrap gestisce griglia e componenti, mentre i dati arrivano da un adattatore API isolato in un unico file: oggi usa Deezer tramite il proxy didattico di Strive School, domani può usare qualsiasi provider senza toccare le pagine.
+Il progetto replica l'esperienza di Spotify con HTML, CSS e JavaScript vanilla, senza framework applicativi né build step. Bootstrap gestisce griglia e componenti, mentre i dati arrivano da un adattatore API isolato in un unico file: oggi supporta Audius (brani completi) e Deezer (anteprime tramite il proxy didattico di Strive School), domani può usare qualsiasi provider senza toccare le pagine.
 
 Tutto ciò che riguarda la libreria personale (brani che ti piacciono, album salvati, artisti seguiti, playlist) viene salvato in `localStorage`.
 
@@ -36,6 +36,8 @@ Tutto ciò che riguarda la libreria personale (brani che ti piacciono, album sal
 - **Brani che ti piacciono**: pagina dedicata con play, rimozione e durata totale
 - **La tua libreria**: playlist, album salvati e artisti seguiti
 - **Playlist personali**: creazione, aggiunta e rimozione brani, eliminazione
+- **Doppio provider**: Audius per i brani completi (predefinito) e Deezer per il catalogo mainstream con anteprime
+- Badge nel player: **Anteprima 30s** oppure **Brano completo**
 - Aggiunta del brano corrente a una playlist dal player o dalle tracce di un album
 - Riproduzione che continua quando si cambia pagina
 - Recupero automatico delle anteprime scadute tramite l'API
@@ -74,7 +76,18 @@ npm run check
 - **La tua libreria**: playlist, album e artisti
 - **Player**: barra fissa su desktop, mini player su mobile
 
-## 🔌 Come cambiare provider musicale
+## 🔌 Provider musicale
+
+L'app supporta due provider intercambiabili, selezionabili da **Sorgente: provider** nella sidebar (desktop), da **Impostazioni** nella barra inferiore (mobile) o dalla pagina **La tua libreria**:
+
+| Provider | Brani | Catalogo | Chiave API |
+|---|---|---|---|
+| **Audius** (default) | **Brani completi** | Indipendente: elettronica, lofi, hip-hop, house, remix | Nessuna |
+| **Deezer** | Anteprime da 30 secondi | Mainstream | Nessuna (proxy didattico) |
+
+Alla prima apertura l'app parte con **Audius** e i brani completi. La scelta viene salvata in `localStorage` e il player mostra un badge **Anteprima 30s** oppure **Brano completo**. I brani salvati nei preferiti restano riproducibili anche dopo aver cambiato provider, perché ogni traccia conserva il proprio provider.
+
+### Aggiungere un altro provider
 
 Tutte le chiamate passano da **`js/music-api.js`**. Le pagine ricevono solo oggetti normalizzati:
 
@@ -82,14 +95,13 @@ Tutte le chiamate passano da **`js/music-api.js`**. Le pagine ricevono solo ogge
 - `Album`: `{ id, title, cover, coverSmall, artist, year, releaseDate, copyright, tracks }`
 - `Artist`: `{ id, name, fans, picture, pictureMedium, pictureSmall }`
 
-Per passare a un provider con brani completi:
+Per aggiungere un provider:
 
-1. Apri `js/music-api.js`.
-2. Modifica l'oggetto `config` (`provider`, `baseUrl`, `supportsFullTracks`).
-3. Adatta le funzioni `search`, `getAlbum`, `getArtist`, `getArtistTop`, `getArtistAlbums` e `getTrack` alla forma dei dati del nuovo servizio.
-4. Fai in modo che `normalizeTrack` restituisca in `streamUrl` l'URL del brano completo (oggi contiene l'anteprima Deezer da 30 secondi).
+1. Crea un nuovo oggetto provider in `js/music-api.js` con `search`, `getAlbum`, `getArtist`, `getArtistTop`, `getArtistAlbums`, `getTrack` e `resolveStream`.
+2. Fai restituire l'URL riproducibile in `streamUrl` (anteprima o brano completo).
+3. Aggiungilo all'oggetto `PROVIDERS`.
 
-Il player, le pagine e la libreria non vanno modificati: usano solo `streamUrl`. La funzione `resolveStream` gestisce già il rinnovo degli URL scaduti, quindi può essere riadattata o svuotata a seconda del provider.
+Player, pagine, preferiti, libreria e playlist non vanno modificati. La funzione `resolveStream` gestisce già il rinnovo degli URL scaduti per Deezer.
 
 ## 📸 Screenshot
 
@@ -142,7 +154,9 @@ Il player, le pagine e la libreria non vanno modificati: usano solo `streamUrl`.
 
 ### Limiti noti
 
-- L'API è raggiunta tramite un proxy non ufficiale (`striveschool-api.herokuapp.com`), senza SLA.
+- Deezer viene raggiunto tramite un proxy non ufficiale (`striveschool-api.herokuapp.com`) e fornisce solo anteprime da 30 secondi.
+- Audius offre brani completi, ma il catalogo è indipendente: non contiene i successi delle major (si trovano remix, cover e type beat).
+- La disponibilità di copertine e stream Audius dipende dai nodi della rete Audius.
 - La sezione "I tuoi episodi" è un segnaposto in attesa di un provider podcast.
 - La colonna "Attività amici" usa dati dimostrativi statici.
 - I controlli automatici coprono link, id duplicati e sintassi JavaScript, ma non sono test end-to-end.

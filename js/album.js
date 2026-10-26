@@ -71,6 +71,9 @@
     const totalSeconds = Library.durationOfTracks(tracks);
     const totalDuration = totalSeconds ? Math.round(totalSeconds / 60) + ' min' : '';
     const year = album.year || '';
+    const typeLabel = album.recordType === 'playlist'
+      ? 'PLAYLIST'
+      : (album.recordType === 'single' ? 'SINGOLO' : 'ALBUM');
 
     const metaParts = [];
     if (album.artist.id) {
@@ -90,7 +93,7 @@
       '<div class="album-header">' +
         '<img src="' + U.escapeHtml(album.cover) + '" alt="Copertina di ' + U.escapeHtml(album.title) + '" class="album-cover-lg">' +
         '<div class="album-info">' +
-          '<div class="album-type">ALBUM</div>' +
+          '<div class="album-type">' + typeLabel + '</div>' +
           '<h1 class="album-title">' + U.escapeHtml(album.title) + '</h1>' +
           '<div class="album-details">' +
             (album.artistPicture

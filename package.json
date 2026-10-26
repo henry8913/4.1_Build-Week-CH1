@@ -1,6 +1,6 @@
 {
   "name": "spotify-clone-team1",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "description": "Clone didattico di Spotify in HTML, CSS e JavaScript vanilla",
   "scripts": {
