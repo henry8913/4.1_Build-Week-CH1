@@ -10,6 +10,7 @@
   const U = window.AppUtils;
   const MusicApi = window.MusicApi;
   const Library = window.AppLibrary;
+  const IS_AUDIUS = MusicApi.getProvider() === 'audius';
 
   let currentArtist = null;
 
@@ -79,7 +80,8 @@
           '<div class="artist-titles">' +
             '<p class="artist-label">Artista</p>' +
             '<h1 class="artist-title">' + U.escapeHtml(artist.name) + '</h1>' +
-            '<p class="artist-fans mb-0">' + U.formatNumber(artist.fans) + ' ascoltatori mensili</p>' +
+            '<p class="artist-fans mb-0">' + U.formatNumber(artist.fans) +
+              (IS_AUDIUS ? ' follower' : ' ascoltatori mensili') + '</p>' +
           '</div>' +
         '</div>' +
       '</header>' +

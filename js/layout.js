@@ -78,6 +78,13 @@
             '<li class="nav-item">' +
               '<a class="nav-link" href="library.html#episodes"><i class="bi bi-bookmark-fill"></i> I tuoi episodi</a>' +
             '</li>' +
+            '<li class="nav-item">' +
+              '<button type="button" class="nav-link nav-button" id="provider-settings-link">' +
+                '<i class="bi bi-sliders"></i> <span id="provider-settings-label">Sorgente: ' +
+                  U.escapeHtml(window.MusicApi ? window.MusicApi.getProviderInfo().label : 'Deezer') +
+                '</span>' +
+              '</button>' +
+            '</li>' +
           '</ul>' +
 
           '<div class="sidebar-divider"></div>' +
@@ -166,6 +173,7 @@
                 '<div class="track-info ms-2">' +
                   '<div class="track-name">Nessun brano</div>' +
                   '<div class="artist-name">Seleziona un brano</div>' +
+                  '<div class="source-badge" id="source-badge">Anteprima 30s</div>' +
                 '</div>' +
                 '<button type="button" class="btn btn-link text-white ms-2 like-btn" aria-label="Salva brano nei preferiti" aria-pressed="false">' +
                   '<i class="bi bi-heart"></i>' +
@@ -308,6 +316,24 @@
           '<div class="app-modal-actions">' +
             '<button type="button" class="btn btn-dark" data-close-modal>Annulla</button>' +
             '<button type="button" class="btn btn-danger" id="confirm-accept">Elimina</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="app-modal" id="provider-modal" aria-hidden="true">' +
+        '<div class="app-modal-backdrop" data-close-modal></div>' +
+        '<div class="app-modal-panel" role="dialog" aria-modal="true" aria-labelledby="provider-modal-title">' +
+          '<div class="app-modal-header">' +
+            '<h2 id="provider-modal-title">Sorgente musicale</h2>' +
+            '<button type="button" class="btn btn-link text-white" data-close-modal aria-label="Chiudi">' +
+              '<i class="bi bi-x-lg"></i>' +
+            '</button>' +
+          '</div>' +
+          '<p class="app-modal-subtitle">Scegli da dove arrivano brani e copertine. Il cambio ricarica la pagina.</p>' +
+          '<div class="provider-options" id="provider-options"></div>' +
+          '<div class="app-modal-actions">' +
+            '<button type="button" class="btn btn-dark" data-close-modal>Annulla</button>' +
+            '<button type="button" class="btn btn-success" id="provider-apply">Applica</button>' +
           '</div>' +
         '</div>' +
       '</div>'
@@ -512,6 +538,43 @@
     openModal(modal);
   }
 
+  function openProviderSettings() {
+    if (!window.MusicApi) return;
+
+    const container = document.getElementById('provider-options');
+    const current = window.MusicApi.getProvider();
+
+    if (container) {
+      container.innerHTML = window.MusicApi.listProviders().map(function (provider) {
+        const checked = provider.id === current;
+
+        return (
+          '<label class="provider-option' + (checked ? ' is-current' : '') + '">' +
+            '<input type="radio" name="music-provider" value="' + U.escapeHtml(provider.id) + '"' +
+              (checked ? ' checked' : '') + '>' +
+            '<span class="provider-option-text">' +
+              '<strong>' + U.escapeHtml(provider.label) + '</strong>' +
+              '<small>' + U.escapeHtml(provider.description) + '</small>' +
+            '</span>' +
+            '<span class="provider-option-badge' + (provider.supportsFullTracks ? ' is-full' : '') + '">' +
+              (provider.supportsFullTracks ? 'Brani completi' : 'Anteprime 30s') +
+            '</span>' +
+          '</label>'
+        );
+      }).join('');
+
+      container.onchange = function (event) {
+        if (!event.target || event.target.name !== 'music-provider') return;
+        U.qsa('.provider-option', container).forEach(function (option) {
+          const input = option.querySelector('input');
+          option.classList.toggle('is-current', !!(input && input.checked));
+        });
+      };
+    }
+
+    openModal(document.getElementById('provider-modal'));
+  }
+
   function initModals() {
     const confirmAccept = document.getElementById('confirm-accept');
     if (confirmAccept) {
@@ -537,6 +600,12 @@
         return;
       }
 
+      if (event.target.closest('#provider-settings-link')) {
+        event.preventDefault();
+        openProviderSettings();
+        return;
+      }
+
       if (event.target.closest('#add-new-playlist')) {
         event.preventDefault();
         const track = pendingTrackForPlaylist;
@@ -550,8 +619,7 @@
     });
 
     // Form creazione playlist.
-    const form = document.getElementById('create-playlist-form');
-    if (form) {
+    const form = document.getElementById('create-playlist-form');    if (form) {
       form.addEventListener('submit', function (event) {
         event.preventDefault();
         const input = document.getElementById('create-playlist-name');
@@ -571,6 +639,32 @@
         closeAllModals();
         renderPlaylistNav();
         showToast('Playlist "' + playlist.name + '" creata');
+      });
+    }
+
+    // Applica il provider musicale.
+    const providerApply = document.getElementById('provider-apply');
+    if (providerApply) {
+      providerApply.addEventListener('click', function () {
+        const selected = document.querySelector('input[name="music-provider"]:checked');
+        if (!selected || !window.MusicApi) return;
+
+        if (selected.value === window.MusicApi.getProvider()) {
+          closeAllModals();
+          return;
+        }
+
+        window.MusicApi.setProvider(selected.value);
+        if (window.musicPlayer && window.musicPlayer.clear) {
+          window.musicPlayer.clear();
+        }
+
+        const page = document.body.getAttribute('data-page');
+        if (page === 'album' || page === 'artist') {
+          window.location.href = 'index.html';
+        } else {
+          window.location.reload();
+        }
       });
     }
 
@@ -617,6 +711,7 @@
     showToast: showToast,
     openCreatePlaylist: openCreatePlaylist,
     openAddToPlaylist: openAddToPlaylist,
+    openProviderSettings: openProviderSettings,
     confirm: openConfirm,
     closeAllModals: closeAllModals
   };

@@ -11,14 +11,38 @@
   const U = window.AppUtils;
   const MusicApi = window.MusicApi;
 
-  const RECENT_ARTISTS = ['Eminem', 'Taylor Swift', 'Ed Sheeran', 'Billie Eilish', 'Coldplay', 'Daft Punk', 'Bruno Mars', 'Lady Gaga', 'Drake', 'Dua Lipa', 'The Weeknd', 'Rihanna', 'Post Malone', 'Ariana Grande', 'Harry Styles', 'Travis Scott', 'Paramore', 'J. Cole', 'Salmo', 'Fedez'];
+  const IS_AUDIUS = MusicApi.getProvider() === 'audius';
 
-  const FEATURED_ARTISTS = ['Fedez', 'Salmo', 'Dua Lipa', 'The Weeknd', 'Adele', 'Drake', 'Bruno Mars', 'Lady Gaga', 'Billie Eilish', 'Post Malone', 'Ed Sheeran', 'Sia', 'Shawn Mendes', 'Khalid', 'Taylor Swift', 'Maroon 5', 'Imagine Dragons', 'Ariana Grande', 'Sam Smith', 'Miley Cyrus', 'Rihanna', 'Harry Styles', 'Pink', 'The Killers', 'Paramore'];
+  const RECENT_ARTISTS = IS_AUDIUS
+    ? ['lofi', 'chill', 'chillhop', 'electronic', 'hip hop', 'house', 'techno', 'ambient', 'r&b', 'jazz', 'remix', 'study beats']
+    : ['Eminem', 'Taylor Swift', 'Ed Sheeran', 'Billie Eilish', 'Coldplay', 'Daft Punk', 'Bruno Mars', 'Lady Gaga', 'Drake', 'Dua Lipa', 'The Weeknd', 'Rihanna', 'Post Malone', 'Ariana Grande', 'Harry Styles', 'Travis Scott', 'Paramore', 'J. Cole', 'Salmo', 'Fedez'];
 
-  const TRENDING_GENRES = ['pop', 'rap', 'electronic', 'indie', 'metal', 'rock', 'jazz', 'blues', 'reggae', 'country', 'hip-hop', 'alternative', 'folk', 'punk', 'soul', 'disco', 'latin', 'synthwave'];
+  const FEATURED_ARTISTS = IS_AUDIUS
+    ? ['lofi', 'electronic', 'hip hop', 'house', 'chill', 'techno', 'remix', 'ambient', 'jazz']
+    : ['Fedez', 'Salmo', 'Dua Lipa', 'The Weeknd', 'Adele', 'Drake', 'Bruno Mars', 'Lady Gaga', 'Billie Eilish', 'Post Malone', 'Ed Sheeran', 'Sia', 'Shawn Mendes', 'Khalid', 'Taylor Swift', 'Maroon 5', 'Imagine Dragons', 'Ariana Grande', 'Sam Smith', 'Miley Cyrus', 'Rihanna', 'Harry Styles', 'Pink', 'The Killers', 'Paramore'];
+
+  const TRENDING_GENRES = IS_AUDIUS
+    ? ['lofi', 'electronic', 'hip hop', 'house', 'chill', 'techno', 'remix', 'ambient', 'r&b', 'jazz']
+    : ['pop', 'rap', 'electronic', 'indie', 'metal', 'rock', 'jazz', 'blues', 'reggae', 'country', 'hip-hop', 'alternative', 'folk', 'punk', 'soul', 'disco', 'latin', 'synthwave'];
+
+  const ALBUM_QUERY = IS_AUDIUS ? 'lofi' : 'rock';
 
   function randomItem(list) {
     return list[Math.floor(Math.random() * list.length)];
+  }
+
+  // Prova piu' query finche' una restituisce risultati: Audius non ha
+  // tutti i generi, quindi evitiamo sezioni vuote a caso.
+  async function searchWithFallback(queries, limit) {
+    for (let index = 0; index < queries.length; index++) {
+      try {
+        const items = await MusicApi.search(queries[index], limit);
+        if (items.length) return items;
+      } catch (error) {
+        console.warn('Ricerca non riuscita per "' + queries[index] + '":', error);
+      }
+    }
+    return [];
   }
 
   function uniqueByAlbum(tracks) {
@@ -57,6 +81,7 @@
       ' data-cover="' + U.escapeHtml(track.album.coverSmall || track.album.cover) + '"' +
       ' data-preview-url="' + U.escapeHtml(track.streamUrl) + '"' +
       ' data-duration="' + U.escapeHtml(track.duration) + '"' +
+      ' data-provider="' + U.escapeHtml(track.provider || MusicApi.getProvider()) + '"' +
       ' data-album-url="' + U.escapeHtml(U.pageUrl('album.html', { id: track.album.id })) + '"'
     );
   }
@@ -110,86 +135,82 @@
   // RICHIESTE
   // ---------------------------------------------------
 
-  function loadFeaturedAlbum() {
+  async function loadFeaturedAlbum() {
     const container = document.getElementById('featured-album');
     if (!container) return;
 
-    MusicApi.search(randomItem(FEATURED_ARTISTS), 1)
-      .then(function (tracks) {
-        if (!tracks.length) throw new Error('Nessun album in evidenza disponibile');
-        renderFeaturedAlbum(tracks[0]);
-      })
-      .catch(function (error) {
-        console.error('Errore album in evidenza:', error);
-        U.showError(container, 'Errore nel caricamento: ' + error.message);
-      });
+    try {
+      const tracks = await searchWithFallback([randomItem(FEATURED_ARTISTS), 'lofi', 'electronic'], 5);
+      if (!tracks.length) throw new Error('Nessun album in evidenza disponibile');
+      renderFeaturedAlbum(tracks[0]);
+    } catch (error) {
+      console.error('Errore album in evidenza:', error);
+      U.showError(container, 'Errore nel caricamento: ' + error.message);
+    }
   }
 
-  function loadRecentlyPlayed() {
+  async function loadRecentlyPlayed() {
     const container = document.getElementById('recent-container');
     if (!container) return;
 
     U.showSpinner(container);
 
-    MusicApi.search(randomItem(RECENT_ARTISTS), 6)
-      .then(function (tracks) {
-        const items = uniqueRecent(tracks).slice(0, 6);
-        if (!items.length) {
-          container.innerHTML = '<div class="col-12 empty-state">Nessun ascolto recente disponibile.</div>';
-          return;
-        }
-        container.innerHTML = items.map(recentMarkup).join('');
-      })
-      .catch(function (error) {
-        console.error('Errore ascolti recenti:', error);
-        U.showError(container, 'Errore nel caricamento: ' + error.message);
-      });
+    try {
+      const tracks = await searchWithFallback([randomItem(RECENT_ARTISTS), 'chill', 'lofi'], 8);
+      const items = uniqueRecent(tracks).slice(0, 6);
+      if (!items.length) {
+        container.innerHTML = '<div class="col-12 empty-state">Nessun ascolto recente disponibile.</div>';
+        return;
+      }
+      container.innerHTML = items.map(recentMarkup).join('');
+    } catch (error) {
+      console.error('Errore ascolti recenti:', error);
+      U.showError(container, 'Errore nel caricamento: ' + error.message);
+    }
   }
 
-  function loadAlbumList() {
+  async function loadAlbumList() {
     const container = document.getElementById('album-list');
     if (!container) return;
 
     U.showSpinner(container);
 
-    MusicApi.search('rock')
-      .then(function (tracks) {
-        const albums = uniqueByAlbum(tracks).slice(0, 12);
-        if (!albums.length) {
-          container.innerHTML = '<div class="col-12 empty-state">Nessun album disponibile al momento.</div>';
-          return;
-        }
-        container.innerHTML = albums.map(function (track) {
-          return cardMarkup(track, 'col-6 col-sm-4 col-md-3 col-lg-2');
-        }).join('');
-      })
-      .catch(function (error) {
-        console.error('Errore lista album:', error);
-        U.showError(container, 'Errore nel caricamento: ' + error.message);
-      });
+    try {
+      const tracks = await searchWithFallback([ALBUM_QUERY, IS_AUDIUS ? 'electronic' : 'rock'], 12);
+      const albums = uniqueByAlbum(tracks).slice(0, 12);
+      if (!albums.length) {
+        container.innerHTML = '<div class="col-12 empty-state">Nessun album disponibile al momento.</div>';
+        return;
+      }
+      container.innerHTML = albums.map(function (track) {
+        return cardMarkup(track, 'col-6 col-sm-4 col-md-3 col-lg-2');
+      }).join('');
+    } catch (error) {
+      console.error('Errore lista album:', error);
+      U.showError(container, 'Errore nel caricamento: ' + error.message);
+    }
   }
 
-  function loadTrending() {
+  async function loadTrending() {
     const container = document.getElementById('trending-container');
     if (!container) return;
 
     U.showSpinner(container);
 
-    MusicApi.search(randomItem(TRENDING_GENRES), 5)
-      .then(function (tracks) {
-        const albums = uniqueByAlbum(tracks).slice(0, 5);
-        if (!albums.length) {
-          container.innerHTML = '<div class="col-12 empty-state">Nessun brano in tendenza al momento.</div>';
-          return;
-        }
-        container.innerHTML = albums.map(function (track) {
-          return cardMarkup(track, 'col-6 col-sm-4 col-md-3 col-lg-2');
-        }).join('');
-      })
-      .catch(function (error) {
-        console.error('Errore brani in tendenza:', error);
-        U.showError(container, 'Errore nel caricamento: ' + error.message);
-      });
+    try {
+      const tracks = await searchWithFallback([randomItem(TRENDING_GENRES), 'electronic', 'hip hop'], 8);
+      const albums = uniqueByAlbum(tracks).slice(0, 5);
+      if (!albums.length) {
+        container.innerHTML = '<div class="col-12 empty-state">Nessun brano in tendenza al momento.</div>';
+        return;
+      }
+      container.innerHTML = albums.map(function (track) {
+        return cardMarkup(track, 'col-6 col-sm-4 col-md-3 col-lg-2');
+      }).join('');
+    } catch (error) {
+      console.error('Errore brani in tendenza:', error);
+      U.showError(container, 'Errore nel caricamento: ' + error.message);
+    }
   }
 
   // ---------------------------------------------------
@@ -204,6 +225,7 @@
 
     container.dataset.albumId = track.album.id;
     container.dataset.trackId = track.id;
+    container.dataset.provider = track.provider || MusicApi.getProvider();
     container.dataset.artistId = track.artist.id;
     container.dataset.albumTitle = track.album.title;
     container.dataset.artistName = track.artist.name;
@@ -252,6 +274,7 @@
 
     return {
       id: container.dataset.trackId || '',
+      provider: container.dataset.provider || MusicApi.getProvider(),
       streamUrl: container.dataset.previewUrl || '',
       preview: container.dataset.previewUrl || '',
       title: container.dataset.title || '',
@@ -292,6 +315,7 @@
   function cardTrack(card) {
     return {
       id: card.dataset.trackId || '',
+      provider: card.dataset.provider || MusicApi.getProvider(),
       streamUrl: card.dataset.previewUrl || '',
       preview: card.dataset.previewUrl || '',
       title: card.dataset.title || '',

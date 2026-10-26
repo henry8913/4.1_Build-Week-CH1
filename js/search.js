@@ -189,6 +189,7 @@
                 ' data-cover="' + U.escapeHtml(track.album.coverSmall) + '"' +
                 ' data-preview-url="' + U.escapeHtml(track.streamUrl) + '"' +
                 ' data-duration="' + U.escapeHtml(track.duration) + '"' +
+                ' data-provider="' + U.escapeHtml(track.provider || MusicApi.getProvider()) + '"' +
                 ' data-album-url="' + U.escapeHtml(U.pageUrl('album.html', { id: track.album.id })) + '">' +
                 '<img src="' + U.escapeHtml(cover) + '" class="card-img-top" alt="' + U.escapeHtml(title) + '" loading="lazy">' +
                 '<span class="play-hover" role="button" tabindex="-1" aria-label="Riproduci ' + U.escapeHtml(track.title) + '">' +
@@ -212,6 +213,7 @@
   function trackFromCard(card) {
     return {
       id: card.getAttribute('data-track-id') || '',
+      provider: card.getAttribute('data-provider') || MusicApi.getProvider(),
       streamUrl: card.getAttribute('data-preview-url') || '',
       preview: card.getAttribute('data-preview-url') || '',
       title: card.getAttribute('data-title') || '',

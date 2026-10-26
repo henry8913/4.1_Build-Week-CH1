@@ -72,6 +72,28 @@
   text-decoration: underline;
 }
 
+.source-badge {
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 2px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.09);
+  color: var(--spotify-light-gray);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.source-badge.is-full {
+  background-color: var(--spotify-green);
+  color: #08210f;
+}
+
 .like-btn {
   color: var(--spotify-light-gray);
   padding: 4px 6px;

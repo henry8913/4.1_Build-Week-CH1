@@ -53,6 +53,7 @@
     const artist = track.artist || {};
     const album = track.album || {};
     const streamUrl = track.streamUrl || track.preview || '';
+    const provider = track.provider || inferProvider(streamUrl);
 
     return {
       id: String(track.id || ''),
@@ -70,8 +71,17 @@
       duration: Number(track.duration) || 0,
       streamUrl: streamUrl,
       preview: streamUrl,
-      provider: track.provider || (MusicApi ? MusicApi.config.provider : '')
+      provider: provider
     };
+  }
+
+  function inferProvider(url) {
+    const value = String(url || '');
+
+    if (value.indexOf('audius.co') !== -1 || value.indexOf('app_name=') !== -1) return 'audius';
+    if (value.indexOf('dzcdn') !== -1 || value.indexOf('deezer') !== -1) return 'deezer';
+
+    return MusicApi ? MusicApi.getProvider() : '';
   }
 
   function hasStream(track) {
@@ -178,6 +188,7 @@
       artistName: document.querySelector('.artist-name'),
       totalTime: document.querySelector('.total-time'),
       currentTime: document.querySelector('.current-time'),
+      sourceBadge: document.getElementById('source-badge'),
 
       playBtn: document.querySelector('.play-btn'),
       prevBtn: document.querySelector('.prev-btn'),
@@ -215,6 +226,15 @@
     if (element) element.textContent = text;
   }
 
+  function updateSourceBadge(track) {
+    if (!els.sourceBadge || !MusicApi) return;
+
+    const info = MusicApi.getProviderInfo(track && track.provider);
+    els.sourceBadge.textContent = info.badge;
+    els.sourceBadge.classList.toggle('is-full', info.supportsFullTracks);
+    els.sourceBadge.title = info.label + ' - ' + info.description;
+  }
+
   function updateBar(track) {
     if (!hasPlayerBar()) return;
 
@@ -225,6 +245,7 @@
       setText(els.mobileArtistName, 'Seleziona un brano');
       setText(els.totalTime, '0:00');
       updateLikeIcons();
+      updateSourceBadge(null);
       return;
     }
 
@@ -255,6 +276,7 @@
     });
 
     updateLikeIcons();
+    updateSourceBadge(track);
     updateMediaSession(track);
     highlightRows();
   }
@@ -499,6 +521,26 @@
 
   function pause() {
     audio.pause();
+  }
+
+  function clear() {
+    audio.pause();
+    audio.removeAttribute('src');
+    loadedUrl = null;
+    currentTrack = null;
+    playlist = [];
+    currentIndex = -1;
+    isPlaying = false;
+
+    try {
+      sessionStorage.removeItem(PLAYER_STATE_KEY);
+    } catch (error) {
+      // sessionStorage non disponibile.
+    }
+
+    updateBar(null);
+    updateProgressUI();
+    updatePlayIcons();
   }
 
   function playNext() {
@@ -904,6 +946,7 @@
     playTrackList: playTrackList,
     toggle: toggle,
     pause: pause,
+    clear: clear,
     isPlaying: function () { return isPlaying; },
     setPlaylist: function (tracks) {
       playlist = (tracks || []).map(normalizeTrack).filter(hasStream);

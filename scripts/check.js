@@ -75,7 +75,7 @@ function checkPage(page) {
 
   const expectedScripts = ['js/utils.js', 'js/music-api.js', 'js/library.js', 'js/layout.js', 'js/player.js'];
   expectedScripts.forEach(function (script) {
-    if (!html.includes('src="' + script + '"')) {
+    if (!html.includes('src="' + script)) {
       errors.push(page + ': script condiviso mancante -> ' + script);
     }
   });
